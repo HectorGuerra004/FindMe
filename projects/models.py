@@ -1,4 +1,3 @@
-# Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 
@@ -17,6 +16,12 @@ class UserManager(BaseUserManager):
         user.is_active = True
         user.save(using=self._db)
         return user
+    
+    def authenticate(self, email=None, password=None):
+        user = self.get(email=email)
+        if user and user.check_password(password):
+            return user
+        return None
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=100, unique=True)
@@ -41,7 +46,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     nombre = models.CharField(max_length=100, blank=True, null=True)
     apellido = models.CharField(max_length=100, blank=True, null=True)
-    img_profile = models.BinaryField(blank=True, null=True)
+    img_profile = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     biografia = models.CharField(max_length=255, blank=True, null=True)
     ubicacion = models.CharField(max_length=100, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
@@ -52,7 +57,7 @@ class Profile(models.Model):
 
 class Portfolio(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
-    archivo = models.BinaryField(blank=True, null=True)
+    archivo = models.FileField(upload_to='portfolio_files/', blank=True, null=True)
     descripcion_archivo = models.CharField(max_length=255, blank=True, null=True)
 
 class Education(models.Model):
