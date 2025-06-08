@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'projects'
+    'rest_framework.authtoken',
+    'projects',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,14 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'projects.authentication.CookieTokenAuthentication',  # 👈 Usa tu clase personalizada
+    ],
+}
+
+AUTH_TOKEN_COOKIE_NAME = 'auth_token'  # Nombre de la cookie donde está el token
 ROOT_URLCONF = 'FoundMe.urls'
 
 TEMPLATES = [
