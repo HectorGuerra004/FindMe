@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     UserRegisterView, UserDetailView,
     ProfileListCreateView, ProfileDetailView,
-    EducationListCreateView, LikeCreateView, LoginView
+    EducationListCreateView, LikeCreateView, LoginView, LogoutView
 )
 
 urlpatterns = [
@@ -13,4 +13,5 @@ urlpatterns = [
     path('profiles/<int:pk>/', ProfileDetailView.as_view(), name='profile-detail'),
     path('educations/', EducationListCreateView.as_view(), name='education-list'),
     path('likes/', LikeCreateView.as_view(), name='like-create'),
+    # +path('logout/', LogoutView.as_view(), name='logout'),
 ]
