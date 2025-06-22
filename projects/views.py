@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import User, Profile, Education, Like
 from .serializers import (
@@ -9,6 +10,8 @@ from .serializers import (
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 class UserRegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
@@ -55,7 +58,7 @@ class LikeCreateView(generics.CreateAPIView):
 class CustomAuthToken(ObtainAuthToken):
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
+                                        context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
         token, created = Token.objects.get_or_create(user=user)
@@ -71,12 +74,50 @@ class LoginView(generics.GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
         user = serializer.validated_data
         token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
+
+        response = Response({
             'user': {
                 'id': user.id,
                 'email': user.email
+                # Puedes añadir más campos del usuario si es necesario
             }
         }, status=status.HTTP_200_OK)
+
+    # Configurar la cookie con el token
+        response.set_cookie(
+            key='auth_token',
+            value=token.key,
+            httponly=True,       # Importante para seguridad
+            secure=True,         # Solo en producción con HTTPS
+            samesite='Lax',      # Protección contra CSRF
+            max_age=606024*7,  # Tiempo de expiración (ej. 1 semana)
+        )
+
+        return response
+
+
+class LogoutView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        # Eliminar el token del usuario
+        Token.objects.filter(user=request.user).delete()
+
+        # Crear respuesta
+        response = Response(
+            {'detail': 'Successfully logged out.'},
+            status=status.HTTP_200_OK
+        )
+
+        # Eliminar la cookie del frontend
+        response.delete_cookie(
+            key='auth_token',
+            path='/',
+            samesite='Lax'
+        )
+
+        return response
