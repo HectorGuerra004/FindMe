@@ -1,272 +1,259 @@
 <template>
-    <div class="profile-page-background">
-        <div class="profile-container">
-        <aside class="sidebar">
-            <div class="profile-intro card">
-            <img :src="user.avatar" alt="User Avatar" class="profile-avatar">
-            <h1 class="profile-name">{{ user.name }}</h1>
-            <p class="profile-location">{{ user.location }}</p>
-            <p class="profile-bio-short">{{ user.bioShort }}</p>
-            </div>
-
-            <div class="portfolio card">
-            <h2 class="card-title">Portfolio</h2>
-            <div class="project-demo">
-                <div class="project-thumbnail">
-                <span class="play-icon">&#9658;</span>
-                </div>
-                <div class="project-info">
-                <p class="project-title">Project Demo</p>
-                <p class="project-details">Website / App</p>
-                </div>
-            </div>
-            <div class="like-buttons">
-                <button class="btn btn-like-purple">● Like</button>
-                <button class="btn btn-like-pink">● Like</button>
-            </div>
-            </div>
-
-            <div class="education-summary card">
-            <h2 class="card-title">Education</h2>
-            <p>{{ user.educationSummary }}</p>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <header class="main-header">
-            <div class="logo">
-                <span class="logo-icon">#</span> Findme
-            </div>
-            <nav class="main-nav">
-                <a href="#" class="nav-link">Contact</a>
-                <a href="#" class="nav-link">Gstats</a>
-                <a href="#" class="nav-link">Doolc</a>
-                <button class="btn btn-primary">Dony Ine</button>
-            </nav>
-            </header>
-
-            <div class="details-card">
-            <div class="bio-full">
-                <p>{{ user.bioFull }}</p>
-                <span class="arrow-icon">&gt;</span>
-            </div>
-            
-            <div class="contact-info">
-                <div>
-                <span class="icon">[t]</span> Duinde
-                <span class="icon">[m]</span> {{ user.phone }}
-                <span class="icon">[e]</span> {{ user.email }}
-                </div>
-                <div>
-                <button class="btn btn-secondary">PONECF</button>
-                <button class="btn btn-icon">?</button>
-                </div>
-            </div>
-
-            <div class="pills-section">
-                <span class="pill">+755-12 455</span>
-                <span class="pill">Jane 123 457</span>
-                <span class="pill">ecnnalid</span>
-                <button class="btn btn-action">Pylce</button>
-            </div>
-
-            <div class="cards-container">
-                <div class="info-card">
-                <h3 class="card-title">Skills</h3>
-                <ul>
-                    <li v-for="skill in user.skills" :key="skill.name" :class="`level-${skill.level}`">
-                    <span class="skill-dot"></span>
-                    {{ skill.name }} - <span class="skill-level">{{ skill.level }}</span>
-                    </li>
-                </ul>
-                </div>
-
-                <div class="info-card">
-                <h3 class="card-title">Work Experience</h3>
-                <ul>
-                    <li v-for="job in user.experience" :key="job.id">
-                    <span class="icon">[w]</span> {{ job.id }}
-                    </li>
-                </ul>
-                </div>
-            </div>
-            </div>
-        </main>
+  <div class="app-container">
+    <aside class="sidebar">
+      <h1 class="logo">find<span>me</span></h1>
+      <nav>
+        <ul>
+          <li><button><img :src="userImage" alt="User" class="avatar" /> Home</button></li>
+          <li><button><i class="icon-profile"></i> Profile</button></li>
+          <li><button><i class="icon-search"></i> Search</button></li>
+          <li><button class="active"><i class="icon-id"></i> 907764</button></li>
+          <li><button><i class="icon-search"></i> Search</button></li>
+          <li><button><i class="icon-connection"></i> Connections</button></li>
+          <li><button><i class="icon-settings"></i> Settings</button></li>
+        </ul>
+      </nav>
+      <div class="footer">
+        <button>View Provisions</button>
+      </div>
+    </aside>
+    <main class="main-content">
+      <header class="main-header">
+        <h2>Find professionals</h2>
+        <div class="search-bar">
+          <input type="text" placeholder="Find Professionals" />
+          <button class="icon-button"><i class="icon-search"></i></button>
         </div>
-    </div>
+        <div class="filter-bar">
+          <button class="location-button">Home</button>
+          <input type="text" placeholder="At Design Corporation" />
+          <button class="filter-button">Dpr</button>
+          <button class="filter-button">0078a</button>
+        </div>
+        <div class="user-menu">
+          <i class="icon-user"></i>
+          <span>Contact</span>
+          <button class="outgoing-button">Outgoing</button>
+        </div>
+      </header>
+      <section class="cards-grid">
+        <div v-for="user in users" :key="user.id" class="card">
+          <img :src="user.image" class="card-avatar" />
+          <div class="card-info">
+            <h3>{{ user.name }}</h3>
+            <p>{{ user.title }}</p>
+            <p class="location">{{ user.location }}</p>
+          </div>
+          <div class="card-actions">
+            <button class="connect-button">Connect</button>
+            <button class="connect-button">Connect</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
 </template>
 
-<script>
-export default {
-    name: 'UserProfile',
-    data() {
-        return {
-            user: {
-                name: 'Jane Doe',
-                location: 'San Francisco, CA',
-                avatar: 'https://i.pravatar.cc/150?img=1', // Placeholder avatar
-                bioShort: 'Experienced software engineer looking for new opportunities.',
-                educationSummary: 'Jame. Endgrigiel Dicom',
-                bioFull: 'Experienced software engineer passionate about building innovative solutions.',
-                phone: '+1 555 13-4567',
-                email: 'jane.doe@example.com',
-                skills: [
-                    { name: 'Python', level: 'advanced' },
-                    { name: 'Javascript', level: 'intermediate' },
-                    { name: 'Typescript', level: 'intermediate' },
-                    { name: 'UX Design', level: 'basic' },
-                    { name: 'Ando-icn', level: 'basic' },
-                ],
-                experience: [
-                    { id: '07 132 1730', company: 'TechCorp' },
-                    { id: '07 132 3310', company: 'Innovate LLC' },
-                    { id: '07 167 1430', company: 'DevSolutions' },
-                    { id: 'G2 132 2330', company: 'Web Services Inc.' },
-                ],
-            },
-        };
-    },
-};
+<script setup>
+import { ref } from 'vue';
+
+const userImage = 'https://via.placeholder.com/40';
+
+const users = ref([
+  {
+    id: 1,
+    name: 'Nedy 70D8&',
+    title: 'Networking, Wide VNet Cotingoh',
+    location: '32.10.00k',
+    image: 'https://via.placeholder.com/80'
+  },
+  {
+    id: 2,
+    name: 'Ned 765086',
+    title: 'Networking, Wide VNet Polingri',
+    location: '9.84.00ck',
+    image: 'https://via.placeholder.com/80'
+  },
+  {
+    id: 3,
+    name: 'Nel eading 6',
+    title: 'VNet Planner, Wide VNet Polingri',
+    location: '52.02.01rk',
+    image: 'https://via.placeholder.com/80'
+  },
+  {
+    id: 4,
+    name: 'Nanlec B16a',
+    title: 'VNet Admin, Wide VNet Polingri',
+    location: '50.01.5trk',
+    image: 'https://via.placeholder.com/80'
+  },
+]);
 </script>
 
 <style scoped>
-/* ======================================= */
-/* =           VARIABLES Y GLOBALES      = */
-/* ======================================= */
-:root {
-    --bg-color: #f4f5fa;
-    --card-bg: #ffffff;
-    --text-primary: #333;
-    --text-secondary: #777;
-    --primary-purple: #8e44ad;
-    --light-purple: #d8c8e1;
-    --accent-pink: #e91e63;
-    --accent-purple-light: #a974ff;
-    --border-color: #e0e0e0;
-    --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    --border-radius-m: 12px;
-    --border-radius-l: 20px;
-}
-
-/* ======================================= */
-/* =           LAYOUT PRINCIPAL          = */
-/* ======================================= */
-.profile-page-background {
-    background-color: var(--bg-color);
-    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 2rem;
-    color: var(--text-primary);
-    display: flex;
-    justify-content: center;
-    min-height: 100vh;
-}
-
-.profile-container {
-    display: flex;
-    gap: 2rem;
-    width: 100%;
-    max-width: 1200px;
+.app-container {
+  display: flex;
+  font-family: 'Inter', sans-serif;
+  background: #f1f3fc;
+  height: 100vh;
 }
 
 .sidebar {
-    flex: 0 0 280px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+  width: 220px;
+  background: #ffffff;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border-right: 1px solid #dcdcdc;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1a1a3c;
+}
+
+.logo span {
+  color: #b04cc8;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+}
+
+nav ul li {
+  margin: 1rem 0;
+}
+
+nav button {
+  width: 100%;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  transition: background 0.3s;
+}
+
+nav button.active,
+nav button:hover {
+  background: #1a1a3c;
+  color: white;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
 }
 
 .main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+  flex: 1;
+  padding: 6rem;
+}
+
+.main-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+}
+
+.icon-button {
+  background: #1a1a3c;
+  color: white;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.filter-bar,
+.user-menu {
+  display: flex;
+  gap: 1rem;
+}
+
+.filter-button,
+.location-button {
+  background: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #ccc;
+}
+
+.outgoing-button {
+  background: #1a1a3c;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  border: none;
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
 }
 
 .card {
-    background-color: var(--card-bg);
-    border-radius: var(--border-radius-l);
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
+  background: white;
+  padding: 1.5rem;
+  border-radius: 24px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.card-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
+.card-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 1rem;
 }
 
-/* ======================================= */
-/* =        COMPONENTES DE SIDEBAR       = */
-/* ======================================= */
-.profile-intro {
-    text-align: center;
+.card-info h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
 }
 
-.profile-avatar {
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-bottom: 1rem;
-    border: 4px solid var(--card-bg);
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+.card-info p {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0.25rem 0;
 }
 
-.profile-name {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin: 0;
-}
-
-.profile-location {
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: 0.25rem;
-}
-
-.profile-bio-short {
-    margin-top: 1rem;
-    font-size: 0.9rem;
-}
-
-.portfolio .project-demo {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.project-thumbnail {
-    width: 60px;
-    height: 60px;
-    background-color: #333;
-    border-radius: var(--border-radius-m);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    font-size: 1.5rem;
-}
-
-.project-title {
-    font-weight: 600;
-}
-.project-details {
-    color: var(--text-secondary);
-    font-size: 0.8rem;
-}
-
-.like-buttons {
-    display: flex;
-    gap: 0.5rem;
-}
-
-.btn {
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 20px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.connect-button {
+  background: #c246a1;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  margin-top: 0.5rem;
 }
 </style>
