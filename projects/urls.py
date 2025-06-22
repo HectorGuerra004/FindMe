@@ -1,17 +1,24 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import (
-    UserRegisterView, UserDetailView,
-    ProfileListCreateView, ProfileDetailView,
-    EducationListCreateView, LikeCreateView, LoginView, LogoutView
+    UserRegisterView,
+    UserDetailView,
+    ProfileViewSet,
+    EducationViewSet,
+    LikeViewSet,
+    LoginView,
+    LogoutView
 )
 
+router = DefaultRouter()
+router.register(r'profiles', ProfileViewSet)
+router.register(r'educations', EducationViewSet)
+router.register(r'likes', LikeViewSet)
+
 urlpatterns = [
-    path('register/', UserRegisterView.as_view(), name='register'),
-    path('login/', LoginView.as_view(), name='login'),  # Nueva ruta
-    path('me/', UserDetailView.as_view(), name='user-detail'),
-    path('profiles/', ProfileListCreateView.as_view(), name='profile-list'),
-    path('profiles/<int:pk>/', ProfileDetailView.as_view(), name='profile-detail'),
-    path('educations/', EducationListCreateView.as_view(), name='education-list'),
-    path('likes/', LikeCreateView.as_view(), name='like-create'),
-    # +path('logout/', LogoutView.as_view(), name='logout'),
+    path('register/', UserRegisterView.as_view()),
+    path('user/', UserDetailView.as_view()),
+    path('login/', LoginView.as_view()),
+    path('logout/', LogoutView.as_view()),
+    path('', include(router.urls)),
 ]
