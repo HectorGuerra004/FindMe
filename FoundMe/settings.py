@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'projects',
+        'drf_spectacular',  # Añade esta línea
+
 ]
 
 MIDDLEWARE = [
@@ -57,6 +59,24 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'projects.authentication.CookieTokenAuthentication',  # 👈 Usa tu clase personalizada
     ],
+        'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API de Proyecto Universitario',
+    'DESCRIPTION': 'Documentación de la API para el proyecto universitario',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'SCHEMA_PATH_PREFIX': '/api/',
+    'AUTHENTICATION_WHITELIST': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'SWAGGER_UI_SETTINGS': {
+        'deepLinking': True,
+        'persistAuthorization': True,
+        'displayRequestDuration': True,
+    },
 }
 
 AUTH_TOKEN_COOKIE_NAME = 'auth_token'  # Nombre de la cookie donde está el token

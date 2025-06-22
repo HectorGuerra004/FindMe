@@ -1,4 +1,4 @@
-from rest_framework import generics, permissions, status
+from rest_framework import viewsets, permissions, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import User, Profile, Education, Like
@@ -9,115 +9,104 @@ from .serializers import (
 )
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
-from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated  # <-- Importación añadida
 
-class UserRegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserRegisterSerializer
+from rest_framework.decorators import action
+
+# Permisos personalizados
+class IsOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        # SAFE_METHODS = GET, HEAD, OPTIONS
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.user == request.user
+
+class IsEducationOwner(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.profile.user == request.user
+
+# Vistas personalizadas (no ViewSet)
+class UserRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
+    
+    def post(self, request):
+        serializer = UserRegisterSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UserDetailView(generics.RetrieveUpdateAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+class UserDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+    
+    def put(self, request):
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_object(self):
-        return self.request.user
-
-class ProfileListCreateView(generics.ListCreateAPIView):
+# ViewSets
+class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsOwner]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-class ProfileDetailView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Profile.objects.all()
-    serializer_class = ProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-class EducationListCreateView(generics.ListCreateAPIView):
+class EducationViewSet(viewsets.ModelViewSet):
     queryset = Education.objects.all()
     serializer_class = EducationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsEducationOwner]
 
     def perform_create(self, serializer):
         serializer.save(profile=self.request.user.profile)
 
-class LikeCreateView(generics.CreateAPIView):
+class LikeViewSet(viewsets.ModelViewSet):
     queryset = Like.objects.all()
     serializer_class = LikeSerializer
     permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['post']  # Solo permitir creación
 
     def perform_create(self, serializer):
         serializer.save(from_profile=self.request.user.profile)
 
-class CustomAuthToken(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                        context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'email': user.email
-        })
-    
-class LoginView(generics.GenericAPIView):
-    serializer_class = LoginSerializer
-
+# Vistas de autenticación
+class LoginView(APIView):
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
+        serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         user = serializer.validated_data
-        token, created = Token.objects.get_or_create(user=user)
+        token, _ = Token.objects.get_or_create(user=user)
 
         response = Response({
-            'user': {
-                'id': user.id,
-                'email': user.email
-                # Puedes añadir más campos del usuario si es necesario
-            }
+            'user': UserSerializer(user).data
         }, status=status.HTTP_200_OK)
 
-    # Configurar la cookie con el token
         response.set_cookie(
             key='auth_token',
             value=token.key,
-            httponly=True,       # Importante para seguridad
-            secure=True,         # Solo en producción con HTTPS
-            samesite='Lax',      # Protección contra CSRF
-            max_age=606024*7,  # Tiempo de expiración (ej. 1 semana)
+            httponly=True,
+            secure=True,
+            samesite='Lax',
+            max_age=604800  # 1 semana
         )
-
         return response
-
 
 class LogoutView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # Eliminar el token del usuario
-        Token.objects.filter(user=request.user).delete()
-
-        # Crear respuesta
-        response = Response(
-            {'detail': 'Successfully logged out.'},
-            status=status.HTTP_200_OK
-        )
-
-        # Eliminar la cookie del frontend
-        response.delete_cookie(
-            key='auth_token',
-            path='/',
-            samesite='Lax'
-        )
-
+        request.user.auth_token.delete()
+        response = Response({'detail': 'Successfully logged out.'})
+        response.delete_cookie('auth_token')
         return response
