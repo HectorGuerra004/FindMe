@@ -48,18 +48,11 @@ class UserRegisterView(APIView):
 
 class UserDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-
-    @extend_schema(
-        responses=UserSerializer,
-    )
+    
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
-
-    @extend_schema(
-        request=UserSerializer,
-        responses=UserSerializer,
-    )
+    
     def put(self, request):
         serializer = UserSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
@@ -123,7 +116,6 @@ class LoginView(APIView):
 class LogoutView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
-
 
     def post(self, request):
         request.user.auth_token.delete()
