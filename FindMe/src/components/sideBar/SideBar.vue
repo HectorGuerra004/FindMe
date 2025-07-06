@@ -112,23 +112,23 @@ onMounted(() => {
             </router-link>
             <router-link to="/Production" class="button" @click="closeIfMobile">
                 <span class="material-icons">description</span>
-                <span class="text">Orden de Produccion</span>
+                <span class="text">link 1</span>
             </router-link>
             <router-link to="/Service" class="button" @click="closeIfMobile">
                 <span class="material-icons">description</span>
-                <span class="text">Orden de Servicio</span>
+                <span class="text">link 1</span>
             </router-link>
             <router-link to="/Memorandum" class="button" @click="closeIfMobile">
                 <span class="material-icons">description</span>
-                <span class="text">Formato de memo</span>
+                <span class="text">link 1</span>
             </router-link>
             <router-link to="/Cotizacion" class="button" @click="closeIfMobile">
                 <span class="material-icons">description</span>
-                <span class="text">Formato de Cotizacion</span>
+                <span class="text">link 1</span>
             </router-link>
             <router-link to="/Stock" class="button" @click="closeIfMobile">
                 <span class="material-icons">email</span>
-                <span class="text">Solicitud de Stock</span>
+                <span class="text">link 1</span>
             </router-link>
         </div>
 
@@ -144,13 +144,16 @@ onMounted(() => {
             <button class="toggle-button" @click="toggleSidebar">
                 <span class="material-icons">{{ sidebarIcon }}</span>
             </button>
-            <h1 class="logo">Mi App</h1>
         </div>
         <div class="header-right">
-            <div class="user-info">
-                <span class="material-icons">account_circle</span>
-                <span>Usuario: {{ username }}</span>
-            </div>
+            <button class="user-info">
+                <!-- <span class="material-icons">account_circle</span> -->
+                <span>Login</span>
+            </button>
+            <button class="user-info">
+                <!-- <span class="material-icons">account_circle</span> -->
+                <span>Register</span>
+            </button>
         </div>
     </header>
 </template>
@@ -163,14 +166,14 @@ onMounted(() => {
     align-items: center;
     padding: 0 1rem;
     height: 60px;
-    background-color: #2c3e50;
-    color: white;
+    background-color: white;
+    color: black;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
     transition: left 0.3s ease;
 
 }
@@ -192,7 +195,9 @@ onMounted(() => {
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: 20px;
+    margin-right: 5px;
+    background-color: white;
 }
 
 .toggle-button {
@@ -288,6 +293,8 @@ onMounted(() => {
 
 .material-icons {
     margin-right: 1rem;
+    color: black;
+
 }
 
 /* Responsive: Móvil */
