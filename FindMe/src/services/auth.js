@@ -1,12 +1,13 @@
 import { ref } from 'vue';
 import api from '../utils/api';
+import { user } from '../stores/user.js'
+
 import { useRouter } from 'vue-router';
 
 export default function useAuth() {
     const router = useRouter();
     const error = ref('');
     const isLoading = ref(false);
-    const user = ref(null); // Para almacenar la información del usuario si el backend la devuelve
 
     const login = async (email, password) => {
         if (!email || !password) {
@@ -64,6 +65,8 @@ export default function useAuth() {
 
     const logout = async () => {
         await api.post('/auth/logout');
+        user.value = null
+
         localStorage.removeItem('user');
         router.push({ name: 'Login' });
     };

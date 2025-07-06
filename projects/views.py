@@ -10,6 +10,8 @@ from .serializers import (
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
+from projects.authentication import CookieTokenAuthentication
+
 from rest_framework.permissions import IsAuthenticated  # <-- Importación añadida
 
 from rest_framework.decorators import action
@@ -113,12 +115,14 @@ class LoginView(APIView):
         )
         return response
 
+    
 class LogoutView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        request.user.auth_token.delete()
-        response = Response({'detail': 'Successfully logged out.'})
-        response.delete_cookie('auth_token')
-        return response
+        authentication_classes = [TokenAuthentication, CookieTokenAuthentication]
+        permission_classes = [IsAuthenticated]
+    
+        def post(self, request):
+            if hasattr(request.user, 'auth_token'):
+                request.user.auth_token.delete()
+            response = Response({'detail': 'Successfully logged out.'})
+            response.delete_cookie('auth_token')
+            return response

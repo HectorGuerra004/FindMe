@@ -2,10 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Importa useRouter
 import axios from 'axios' // Importa axios
+import api from '@/utils/api';
+import { user } from '../../stores/user.js'
+console.log('user global:', user.value)
 
 const sidebarVisible = ref(true)
 const isMobile = ref(false)
-const username = ref("John Doe")
 
 const router = useRouter() // Inicializa useRouter
 
@@ -54,35 +56,17 @@ const checkMobile = () => {
 
     emitState()
 }
-
-// *** Nueva función logout ***
 const logout = async () => {
     try {
-        // 1. Cierra la barra lateral (si es móvil) inmediatamente para una mejor UX
-        closeIfMobile();
-
-        // 2. Realiza la llamada POST a tu backend
-        const response = await axios.post('/logout');
-
-        // 3. Maneja la respuesta del backend
-        console.log(response.data.message); // Debería mostrar "Sesión cerrada"
-
-        // 4. Limpia cualquier dato de sesión del lado del cliente (ej. token en localStorage)
-        // Esto es crucial para asegurar que la sesión se invalide completamente en el frontend.
-        localStorage.removeItem('userToken'); // Si guardas un token JWT aquí
-        // localStorage.removeItem('userRole'); // Cualquier otro dato de sesión
-
-        // 5. Redirige al usuario a la página de inicio de sesión o a la página principal
-        // Asegúrate de que '/login' sea la ruta correcta para tu página de inicio de sesión
-        router.push('/login');
-
+        closeIfMobile()
+        await api.post('/logout/')
+        localStorage.removeItem('auth_token')
+        user.value = null
+        router.push('/login')
     } catch (error) {
-        // Manejo de errores si la solicitud falla
-        console.error('Error al cerrar sesión:', error);
-        alert('Hubo un problema al cerrar sesión. Por favor, inténtalo de nuevo.');
-        // Incluso si falla la llamada al backend, a menudo querrás redirigir
-        // para evitar que el usuario se quede "logueado" en el frontend sin una sesión backend válida.
-        router.push('/login');
+        console.error('Error al cerrar sesión:', error)
+        user.value = null
+        router.push('/login')
     }
 }
 
@@ -110,20 +94,20 @@ onMounted(() => {
                 <span class="material-icons">home</span>
                 <span class="text">Inicio</span>
             </router-link>
-            <router-link to="/profile" class="button" @click="closeIfMobile">
+            <router-link v-if="user" to="/profile" class="button" @click="closeIfMobile">
                 <span class="material-icons">account_circle</span>
-                <span class="text">Perfil de usuario</span>
+                <span class="text">Mi perfil</span>
             </router-link>
-            <router-link to="/configuration" class="button" @click="closeIfMobile">
+            <router-link v-if="user" to="/configuration" class="button" @click="closeIfMobile">
                 <span class="material-icons">settings</span>
                 <span class="text">Configuración</span>
             </router-link>
         </div>
         <div class="menu-bottom">
-            <router-link to="/" class="button" @click="logout">
+            <button v-if="user" class="button" @click="logout">
                 <span class="material-icons">logout</span>
                 <span class="text">Logout</span>
-            </router-link>
+            </button>
         </div>
     </aside>
     <header class="header" :class="{ 'desktop-sidebar-visible': !isMobile && sidebarVisible }">
@@ -133,12 +117,12 @@ onMounted(() => {
             </button>
         </div>
         <div class="header-right">
-            <router-link to="/login" class="button-nav user-info">
-
+           <router-link v-if="!user" to="/login" class="button-nav user-info" @click="closeIfMobile">
+                <span class="material-icons">login</span>
                 <span class="text">Login</span>
             </router-link>
-            <router-link to="/register" class="button-nav user-info">
-                <!-- <span class="material-icons">account_circle</span> -->
+            <router-link v-if="!user" to="/register" class="button-nav user-info" @click="closeIfMobile">
+                <span class="material-icons">person_add</span>
                 <span class="text">Register</span>
             </router-link>
         </div>
