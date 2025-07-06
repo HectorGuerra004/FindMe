@@ -3,30 +3,34 @@ from .models import User, Profile, Portfolio, Education, Experience, Skill, Like
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth import authenticate
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'is_active', 'is_admin', 'fecha_registro']
         extra_kwargs = {'password': {'write_only': True}}
 
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        exclude = ['user']  # Excluye 'user' porque se asigna en el registro
+
 class UserRegisterSerializer(serializers.ModelSerializer):
-    email = serializers.EmailField(validators=[UniqueValidator(queryset=User.objects.all())])
+    profile = ProfileSerializer()  # Anida el serializer de perfil
+
+    email = serializers.EmailField(
+        validators=[UniqueValidator(queryset=User.objects.all(), message="Este correo electrónico ya está registrado.")]
+    )    
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ['email', 'password']
+        fields = ['email', 'password', 'profile']
 
     def create(self, validated_data):
-        return User.objects.create_user(**validated_data)
-
-class ProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-
-    class Meta:
-        model = Profile
-        fields = '__all__'
+        profile_data = validated_data.pop('profile')
+        user = User.objects.create_user(**validated_data)
+        Profile.objects.create(user=user, **profile_data)
+        return user
 
 class PortfolioSerializer(serializers.ModelSerializer):
     class Meta:

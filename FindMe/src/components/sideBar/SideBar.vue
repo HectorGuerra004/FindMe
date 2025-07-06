@@ -106,7 +106,7 @@ onMounted(() => {
         </div>
 
         <div class="menu">
-            <router-link to="/landing" class="button" @click="closeIfMobile">
+            <router-link to="/" class="button" @click="closeIfMobile">
                 <span class="material-icons">home</span>
                 <span class="text">Inicio</span>
             </router-link>
@@ -133,14 +133,14 @@ onMounted(() => {
             </button>
         </div>
         <div class="header-right">
-            <button class="user-info">
+            <router-link to="/login" class="button-nav user-info">
+
+                <span class="text">Login</span>
+            </router-link>
+            <router-link to="/register" class="button-nav user-info">
                 <!-- <span class="material-icons">account_circle</span> -->
-                <span>Login</span>
-            </button>
-            <button class="user-info">
-                <!-- <span class="material-icons">account_circle</span> -->
-                <span>Register</span>
-            </button>
+                <span class="text">Register</span>
+            </router-link>
         </div>
     </header>
 </template>
@@ -277,6 +277,28 @@ onMounted(() => {
 .button.router-link-exact-active {
     background-color: #3498db;
 }
+
+.button-nav {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: white;
+
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s;
+    width: 100%;
+    background-color: #2c3e50;
+}
+
+.button-nav:hover {
+    background-color: #3c4145;
+}
+
+/* .button-nav.router-link-exact-active {
+    background-color: #3498db;
+} */
 
 .material-icons {
     margin-right: 1rem;
