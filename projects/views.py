@@ -14,6 +14,8 @@ from rest_framework.permissions import IsAuthenticated  # <-- Importación añad
 
 from rest_framework.decorators import action
 
+from drf_spectacular.utils import extend_schema
+
 # Permisos personalizados
 class IsOwner(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -32,6 +34,11 @@ class IsEducationOwner(permissions.BasePermission):
 class UserRegisterView(APIView):
     permission_classes = [permissions.AllowAny]
     
+    @extend_schema(
+        request=UserRegisterSerializer,
+        responses=UserRegisterSerializer,
+    )
+
     def post(self, request):
         serializer = UserRegisterSerializer(data=request.data)
         if serializer.is_valid():
@@ -81,6 +88,11 @@ class LikeViewSet(viewsets.ModelViewSet):
 
 # Vistas de autenticación
 class LoginView(APIView):
+    @extend_schema(
+        request=LoginSerializer,
+        responses=UserSerializer,
+    )
+    
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
