@@ -2,10 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // Importa useRouter
 import axios from 'axios' // Importa axios
+import api from '@/utils/api';
+import { user } from '../../stores/user.js'
+console.log('user global:', user.value)
 
 const sidebarVisible = ref(true)
 const isMobile = ref(false)
-const username = ref("John Doe")
 
 const router = useRouter() // Inicializa useRouter
 
@@ -54,35 +56,17 @@ const checkMobile = () => {
 
     emitState()
 }
-
-// *** Nueva función logout ***
 const logout = async () => {
     try {
-        // 1. Cierra la barra lateral (si es móvil) inmediatamente para una mejor UX
-        closeIfMobile();
-
-        // 2. Realiza la llamada POST a tu backend
-        const response = await axios.post('/logout');
-
-        // 3. Maneja la respuesta del backend
-        console.log(response.data.message); // Debería mostrar "Sesión cerrada"
-
-        // 4. Limpia cualquier dato de sesión del lado del cliente (ej. token en localStorage)
-        // Esto es crucial para asegurar que la sesión se invalide completamente en el frontend.
-        localStorage.removeItem('userToken'); // Si guardas un token JWT aquí
-        // localStorage.removeItem('userRole'); // Cualquier otro dato de sesión
-
-        // 5. Redirige al usuario a la página de inicio de sesión o a la página principal
-        // Asegúrate de que '/login' sea la ruta correcta para tu página de inicio de sesión
-        router.push('/login');
-
+        closeIfMobile()
+        await api.post('/logout/')
+        localStorage.removeItem('auth_token')
+        user.value = null
+        router.push('/login')
     } catch (error) {
-        // Manejo de errores si la solicitud falla
-        console.error('Error al cerrar sesión:', error);
-        alert('Hubo un problema al cerrar sesión. Por favor, inténtalo de nuevo.');
-        // Incluso si falla la llamada al backend, a menudo querrás redirigir
-        // para evitar que el usuario se quede "logueado" en el frontend sin una sesión backend válida.
-        router.push('/login');
+        console.error('Error al cerrar sesión:', error)
+        user.value = null
+        router.push('/login')
     }
 }
 
@@ -106,24 +90,24 @@ onMounted(() => {
         </div>
 
         <div class="menu">
-            <router-link to="/landing" class="button" @click="closeIfMobile">
+            <router-link to="/" class="button" @click="closeIfMobile">
                 <span class="material-icons">home</span>
                 <span class="text">Inicio</span>
             </router-link>
-            <router-link to="/profile" class="button" @click="closeIfMobile">
+            <router-link v-if="user" to="/profile" class="button" @click="closeIfMobile">
                 <span class="material-icons">account_circle</span>
-                <span class="text">Perfil de usuario</span>
+                <span class="text">Mi perfil</span>
             </router-link>
-            <router-link to="/configuration" class="button" @click="closeIfMobile">
+            <router-link v-if="user" to="/configuration" class="button" @click="closeIfMobile">
                 <span class="material-icons">settings</span>
                 <span class="text">Configuración</span>
             </router-link>
         </div>
         <div class="menu-bottom">
-            <router-link to="/" class="button" @click="logout">
+            <button v-if="user" class="button" @click="logout">
                 <span class="material-icons">logout</span>
                 <span class="text">Logout</span>
-            </router-link>
+            </button>
         </div>
     </aside>
     <header class="header" :class="{ 'desktop-sidebar-visible': !isMobile && sidebarVisible }">
@@ -131,13 +115,16 @@ onMounted(() => {
             <button class="toggle-button" @click="toggleSidebar">
                 <span class="material-icons">{{ sidebarIcon }}</span>
             </button>
-            <h1 class="logo">Mi App</h1>
         </div>
         <div class="header-right">
-            <div class="user-info">
-                <span class="material-icons">account_circle</span>
-                <span>Usuario: {{ username }}</span>
-            </div>
+           <router-link v-if="!user" to="/login" class="button-nav user-info" @click="closeIfMobile">
+                <span class="material-icons">login</span>
+                <span class="text">Login</span>
+            </router-link>
+            <router-link v-if="!user" to="/register" class="button-nav user-info" @click="closeIfMobile">
+                <span class="material-icons">person_add</span>
+                <span class="text">Register</span>
+            </router-link>
         </div>
     </header>
 </template>
@@ -150,14 +137,14 @@ onMounted(() => {
     align-items: center;
     padding: 0 1rem;
     height: 60px;
-    background-color: #2c3e50;
-    color: white;
+    background-color: white;
+    color: black;
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1000;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
     transition: left 0.3s ease;
 
 }
@@ -179,7 +166,9 @@ onMounted(() => {
     gap: 0.5rem;
     padding: 0.5rem 1rem;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
+    border-radius: 20px;
+    margin-right: 5px;
+    background-color: white;
 }
 
 .toggle-button {
@@ -273,8 +262,32 @@ onMounted(() => {
     background-color: #3498db;
 }
 
+.button-nav {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: white;
+
+    border-radius: 20px;
+    margin-bottom: 0.5rem;
+    transition: background-color 0.2s;
+    width: 100%;
+    background-color: #2c3e50;
+}
+
+.button-nav:hover {
+    background-color: #3c4145;
+}
+
+/* .button-nav.router-link-exact-active {
+    background-color: #3498db;
+} */
+
 .material-icons {
     margin-right: 1rem;
+    color: black;
+
 }
 
 /* Responsive: Móvil */

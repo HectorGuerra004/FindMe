@@ -41,10 +41,13 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'projects',
         'drf_spectacular',  # Añade esta línea
+    'corsheaders',  # Añade esta línea para CORS
+        
 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -63,6 +66,10 @@ REST_FRAMEWORK = {
 
 }
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Cambia el puerto si tu frontend usa otro
+]
+CORS_ALLOW_CREDENTIALS = True
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API de Proyecto Universitario',
     'DESCRIPTION': 'Documentación de la API para el proyecto universitario',
