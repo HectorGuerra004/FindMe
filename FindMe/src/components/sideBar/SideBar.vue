@@ -106,37 +106,24 @@ onMounted(() => {
         </div>
 
         <div class="menu">
-            <router-link to="/Dashboard" class="button" @click="closeIfMobile">
+            <router-link to="/landing" class="button" @click="closeIfMobile">
                 <span class="material-icons">home</span>
                 <span class="text">Inicio</span>
             </router-link>
-            <router-link to="/Production" class="button" @click="closeIfMobile">
-                <span class="material-icons">description</span>
-                <span class="text">link 1</span>
+            <router-link to="/profile" class="button" @click="closeIfMobile">
+                <span class="material-icons">account_circle</span>
+                <span class="text">Perfil de usuario</span>
             </router-link>
-            <router-link to="/Service" class="button" @click="closeIfMobile">
-                <span class="material-icons">description</span>
-                <span class="text">link 1</span>
-            </router-link>
-            <router-link to="/Memorandum" class="button" @click="closeIfMobile">
-                <span class="material-icons">description</span>
-                <span class="text">link 1</span>
-            </router-link>
-            <router-link to="/Cotizacion" class="button" @click="closeIfMobile">
-                <span class="material-icons">description</span>
-                <span class="text">link 1</span>
-            </router-link>
-            <router-link to="/Stock" class="button" @click="closeIfMobile">
-                <span class="material-icons">email</span>
-                <span class="text">link 1</span>
+            <router-link to="/configuration" class="button" @click="closeIfMobile">
+                <span class="material-icons">settings</span>
+                <span class="text">Configuración</span>
             </router-link>
         </div>
-
         <div class="menu-bottom">
-            <button @click="logout" class="button">
-                <span class="material-icons">settings</span>
+            <router-link to="/" class="button" @click="logout">
+                <span class="material-icons">logout</span>
                 <span class="text">Logout</span>
-            </button>
+            </router-link>
         </div>
     </aside>
     <header class="header" :class="{ 'desktop-sidebar-visible': !isMobile && sidebarVisible }">
