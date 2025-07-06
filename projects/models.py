@@ -51,10 +51,11 @@ class Profile(models.Model):
     ubicacion = models.CharField(max_length=100, blank=True, null=True)
     telefono = models.CharField(max_length=20, blank=True, null=True)
     fecha_nacimiento = models.DateField(blank=True, null=True)
+    sobre_mi = models.TextField(blank=True, null=True)  # <-- Nuevo campo agregado
 
     def __str__(self):
         return f"{self.nombre} {self.apellido}" if self.nombre else self.user.email
-
+    
 class Portfolio(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, primary_key=True)
     archivo = models.FileField(upload_to='portfolio_files/', blank=True, null=True)

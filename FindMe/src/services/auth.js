@@ -63,6 +63,37 @@ export default function useAuth() {
         }
     };
 
+    const completarPerfil = async (formData) => {
+        try {
+            isLoading.value = true;
+            error.value = '';
+
+            const response = await api.post('/profile/complete/', formData);
+
+            if (response.data.email) {
+                user.value = response.data;
+                router.push({ name: 'UserProfile' });
+            } else {
+                throw new Error('Información de usuario no recibida');
+            }
+        } catch (err) {
+            // Mostrar todos los errores del backend (pueden venir como objeto)
+            if (err.response && err.response.data) {
+                // Si es un objeto de errores, conviértelo a string legible
+                if (typeof err.response.data === 'object') {
+                    error.value = Object.values(err.response.data).flat().join(' ');
+                } else {
+                    error.value = err.response.data;
+                }
+            } else {
+                error.value = 'Error desconocido al completar el perfil.';
+            }
+            console.error('Error al completar el perfil:', err.response ? err.response.data : err.message);
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
     const logout = async () => {
         await api.post('/auth/logout');
         user.value = null
@@ -74,6 +105,7 @@ export default function useAuth() {
     return {
         login,
         register,
+        completarPerfil,
         logout,
         error,
         isLoading,

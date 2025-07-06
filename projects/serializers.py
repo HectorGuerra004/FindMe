@@ -71,3 +71,35 @@ class LoginSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError("Credenciales inválidas")
         return user
+    
+class CompleteProfileSerializer(serializers.Serializer):
+    sobre_mi = serializers.CharField(required=False, allow_blank=True)
+    educacion = EducationSerializer(many=True, required=False)
+    experiencia = ExperienceSerializer(many=True, required=False)
+    habilidades = SkillSerializer(many=True, required=False)
+
+    def create(self, validated_data):
+        user = self.context['request'].user
+        profile = user.profile
+
+        # Actualiza sobre_mi si viene
+        if 'sobre_mi' in validated_data:
+            profile.sobre_mi = validated_data['sobre_mi']
+            profile.save()
+
+        # Crea educación
+        educaciones = validated_data.get('educacion', [])
+        for edu_data in educaciones:
+            Education.objects.create(user=user, **edu_data)
+
+        # Crea experiencia
+        experiencias = validated_data.get('experiencia', [])
+        for exp_data in experiencias:
+            Experience.objects.create(user=user, **exp_data)
+
+        # Crea habilidades
+        habilidades = validated_data.get('habilidades', [])
+        for skill_data in habilidades:
+            Skill.objects.create(user=user, **skill_data)
+
+        return profile
