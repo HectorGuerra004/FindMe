@@ -18,9 +18,9 @@
               <h2>{{ profileData?.nombre || 'Usuario sin nombre' }} {{ profileData?.apellido || '' }}</h2>
               <p class="location">{{ profileData?.ubicacion || 'Ubicación no disponible' }}</p>
               <div class="bio-like-row">
-                <p class="bio">{{ profileData?.sobre_mi || 'Este usuario no ha escrito su biografía.' }}</p>
+                <p class="bio">Numero de Contacto: {{ profileData?.telefono || 'Este usuario no ha escrito su biografía.' }}</p>
                 <div class="action-buttons action-buttons-right">
-                  <button class="btn-like" @click="onLikeProfile">👍 Like</button>
+                  <!-- <button class="btn-like" @click="onLikeProfile">👍 Like</button> -->
                 </div>
               </div>
             </div>
