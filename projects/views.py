@@ -112,8 +112,8 @@ class LoginView(APIView):
             key='auth_token',
             value=token.key,
             httponly=True,
-            secure=True,
-            samesite='Lax',
+            secure=False,
+            samesite='None',
             max_age=604800  # 1 semana
         )
         return response
