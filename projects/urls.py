@@ -9,7 +9,8 @@ from .views import (
     LoginView,
     LogoutView,
     CompleteProfileView,
-    PublicProfileView
+    PublicProfileView,
+    ProfileListView
 )
 
 router = DefaultRouter()
@@ -25,6 +26,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view()),
     path('complete-profile/', CompleteProfileView.as_view()),
     path('public-profiles/<int:user_id>/', PublicProfileView.as_view(), name='public-profile'),
+    path('profiles/', ProfileListView.as_view(), name='profile-list'),
 
     path('', include(router.urls)),
 ]

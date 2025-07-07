@@ -25,7 +25,7 @@
               </div>
             </div>
           </div>
-          <router-link to="/completeProfile" class="edit-profile-btn" title="Completar perfil">
+          <router-link v-if="isOwnProfile" to="/completeProfile" class="edit-profile-btn" title="Completar perfil">
             ✎ Completar perfil
           </router-link>
         </section>
@@ -54,7 +54,7 @@
           <!-- Habilidades y Experiencia -->
           <div class="right-column">
             <!-- Skills -->
-             <div class="card">
+            <div class="card">
               <h3>Educación</h3>
               <ul class="edu-list" v-if="profileData?.educacion?.length">
                 <li v-for="(edu, index) in profileData.educacion" :key="edu.id || index">
@@ -64,7 +64,7 @@
               </ul>
               <p v-else>No se ha agregado información educativa.</p>
             </div>
-            
+
 
             <!-- Experiencia -->
             <div class="card work-experience">
@@ -114,32 +114,40 @@ const handleSidebarState = (state) => {
   isMobile.value = state.isMobile
 }
 
-const fetchCurrentUserId = async () => {
+// Nueva función para obtener el id del usuario desde localStorage
+const getCurrentUserIdFromStorage = () => {
+  const storedUser = localStorage.getItem('user')
+  if (!storedUser) return null
   try {
-    const currentProfile = await getProfileData();
-    currentUserId.value = currentProfile.user.id;
-    return currentUserId.value;
-  } catch (err) {
-    console.error('Error obteniendo ID usuario actual:', err);
-    return null;
+    const parsed = JSON.parse(storedUser)
+    return parsed.id
+  } catch (e) {
+    console.error('Error al parsear usuario del localStorage:', e)
+    return null
   }
-};
+}
+
+// Reemplazamos fetchCurrentUserId por esta que lee localStorage
+const fetchCurrentUserId = () => {
+  currentUserId.value = getCurrentUserIdFromStorage()
+}
 
 const loadProfileData = async () => {
   loading.value = true;
   error.value = null;
 
   try {
-    const userId = route.params.id;
-    if (!currentUserId.value) {
-      await fetchCurrentUserId();
-    }
+    const userIdParam = route.params.id;
+    fetchCurrentUserId();
 
-    isOwnProfile.value = parseInt(userId) === currentUserId.value;
+    const resolvedId = parseInt(userIdParam);
+    const actualId = currentUserId.value;
+
+    isOwnProfile.value = resolvedId === actualId;
 
     profileData.value = isOwnProfile.value
       ? await getProfileData()
-      : await getProfileById(userId);
+      : await getProfileById(resolvedId);
 
     if (profileData.value?.avatar) {
       userAvatar.value = profileData.value.avatar;
@@ -159,8 +167,8 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('es-ES', options);
 };
 
-onMounted(async () => {
-  await fetchCurrentUserId();
+onMounted(() => {
+  fetchCurrentUserId();
   if (route.params.id) {
     loadProfileData();
   }
@@ -181,12 +189,14 @@ const onLikeProfile = () => {
 
 
 
+
 <style scoped>
 .error {
   color: red;
   font-weight: bold;
   padding: 1rem;
 }
+
 .profile-page {
   padding: 2rem;
   display: flex;

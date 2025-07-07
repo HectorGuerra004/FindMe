@@ -86,6 +86,7 @@ class CompleteProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = [
+            'user',  # ✅ Necesario para que devuelva el ID del usuario
             'nombre',
             'apellido',
             'img_profile',
@@ -127,3 +128,15 @@ class CompleteProfileSerializer(serializers.ModelSerializer):
                 Skill.objects.create(profile=instance, **skill)
 
         return instance
+
+class ProfileListSerializer(serializers.ModelSerializer):
+    user_id = serializers.IntegerField(source='user.id')  # ✅ Necesario para que devuelva el ID del usuario
+    titulo = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Profile
+        fields = ['user_id', 'nombre', 'apellido', 'ubicacion', 'img_profile', 'titulo']
+
+    def get_titulo(self, obj):
+        educacion = Education.objects.filter(profile=obj).order_by('id').first()
+        return educacion.titulo if educacion else None
