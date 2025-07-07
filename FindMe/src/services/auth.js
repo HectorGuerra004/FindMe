@@ -67,32 +67,66 @@ export default function useAuth() {
         try {
             isLoading.value = true;
             error.value = '';
+            console.log('Datos del formulario:', formData);
+            // 1. Cambiar a PATCH y usar la URL correcta
+            const response = await api.patch('/complete-profile/', formData);
 
-            const response = await api.post('/profile/complete/', formData);
+            // 2. Actualizar el store local con los nuevos datos
+            if (response.data) {
+                // Actualizar el perfil en el store de usuario
+                user.value.profile = {
+                    ...user.value.profile,
+                    sobre_mi: formData.sobre_mi,
+                    // Agregar otras propiedades si son necesarias
+                };
 
-            if (response.data.email) {
-                user.value = response.data;
+                // 3. Redirigir después de actualizar el estado local
                 router.push({ name: 'UserProfile' });
             } else {
-                throw new Error('Información de usuario no recibida');
+                throw new Error('No se recibieron datos del servidor');
             }
         } catch (err) {
-            // Mostrar todos los errores del backend (pueden venir como objeto)
-            if (err.response && err.response.data) {
-                // Si es un objeto de errores, conviértelo a string legible
-                if (typeof err.response.data === 'object') {
-                    error.value = Object.values(err.response.data).flat().join(' ');
+            if (err.response) {
+                console.error('Error del backend:', err.response.data); // 👈 esto es clave
+
+                if (err.response.status === 400) {
+                    const errors = [];
+
+                    for (const key in err.response.data) {
+                        if (Array.isArray(err.response.data[key])) {
+                            errors.push(...err.response.data[key]);
+                        } else {
+                            errors.push(err.response.data[key]);
+                        }
+                    }
+
+                    error.value = errors.join('. ');
                 } else {
-                    error.value = err.response.data;
+                    error.value = `Error del servidor: ${err.response.status}`;
                 }
+            } else if (err.request) {
+                error.value = 'No se recibió respuesta del servidor';
             } else {
-                error.value = 'Error desconocido al completar el perfil.';
+                error.value = err.message || 'Error desconocido al completar el perfil';
             }
-            console.error('Error al completar el perfil:', err.response ? err.response.data : err.message);
+
+            console.error('Error al completar el perfil:', err);
         } finally {
             isLoading.value = false;
         }
     };
+
+    const getProfileData = async () => {
+        try {
+            const response = await api.get('/complete-profile/')
+            console.log('Datos recibidos backend:', response.data)
+
+            return response.data
+        } catch (error) {
+            throw error
+        }
+    }
+
 
     const logout = async () => {
         await api.post('/auth/logout');
@@ -107,6 +141,7 @@ export default function useAuth() {
         register,
         completarPerfil,
         logout,
+        getProfileData,
         error,
         isLoading,
         user, // Exponer el usuario para que pueda ser utilizado en componentes

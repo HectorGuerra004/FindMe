@@ -40,17 +40,23 @@ class PortfolioSerializer(serializers.ModelSerializer):
 class EducationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Education
-        fields = '__all__'
+        exclude = ['profile']  # ✅ no 'user'
 
 class ExperienceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Experience
-        fields = '__all__'
+        fields = ['empresa', 'puesto', 'ubicacion_exp', 'inicio_exp', 'fin_exp']
+        extra_kwargs = {
+            'ubicacion_exp': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'inicio_exp': {'required': False, 'allow_null': True},
+            'fin_exp': {'required': False, 'allow_null': True},
+        }
+
 
 class SkillSerializer(serializers.ModelSerializer):
     class Meta:
         model = Skill
-        fields = '__all__'
+        exclude = ['profile']
 
 class LikeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -72,34 +78,40 @@ class LoginSerializer(serializers.Serializer):
             raise serializers.ValidationError("Credenciales inválidas")
         return user
     
-class CompleteProfileSerializer(serializers.Serializer):
-    sobre_mi = serializers.CharField(required=False, allow_blank=True)
-    educacion = EducationSerializer(many=True, required=False)
-    experiencia = ExperienceSerializer(many=True, required=False)
-    habilidades = SkillSerializer(many=True, required=False)
+class CompleteProfileSerializer(serializers.ModelSerializer):
+    educacion = EducationSerializer(many=True, required=False, source='educations')
+    experiencia = ExperienceSerializer(many=True, required=False, source='experiences')
+    habilidades = SkillSerializer(many=True, required=False, source='skills')
 
-    def create(self, validated_data):
-        user = self.context['request'].user
-        profile = user.profile
+    class Meta:
+        model = Profile
+        fields = ['sobre_mi', 'educacion', 'experiencia', 'habilidades']
 
-        # Actualiza sobre_mi si viene
-        if 'sobre_mi' in validated_data:
-            profile.sobre_mi = validated_data['sobre_mi']
-            profile.save()
+    def update(self, instance, validated_data):
+        # Actualizar campo simple
+        instance.sobre_mi = validated_data.get('sobre_mi', instance.sobre_mi)
+        instance.save()
 
-        # Crea educación
-        educaciones = validated_data.get('educacion', [])
-        for edu_data in educaciones:
-            Education.objects.create(user=user, **edu_data)
+        # Actualizar educacion
+        educacion_data = validated_data.pop('educations', None)
+        if educacion_data is not None:
+            # Para simplicidad, eliminar todo y volver a crear
+            instance.educations.all().delete()
+            for edu in educacion_data:
+                Education.objects.create(profile=instance, **edu)
 
-        # Crea experiencia
-        experiencias = validated_data.get('experiencia', [])
-        for exp_data in experiencias:
-            Experience.objects.create(user=user, **exp_data)
+        # Actualizar experiencia
+        experiencia_data = validated_data.pop('experiences', None)
+        if experiencia_data is not None:
+            instance.experiences.all().delete()
+            for exp in experiencia_data:
+                Experience.objects.create(profile=instance, **exp)
 
-        # Crea habilidades
-        habilidades = validated_data.get('habilidades', [])
-        for skill_data in habilidades:
-            Skill.objects.create(user=user, **skill_data)
+        # Actualizar habilidades
+        habilidades_data = validated_data.pop('skills', None)
+        if habilidades_data is not None:
+            instance.skills.all().delete()
+            for skill in habilidades_data:
+                Skill.objects.create(profile=instance, **skill)
 
-        return profile
+        return instance
