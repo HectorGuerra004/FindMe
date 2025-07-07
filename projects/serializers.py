@@ -85,7 +85,19 @@ class CompleteProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profile
-        fields = ['sobre_mi', 'educacion', 'experiencia', 'habilidades']
+        fields = [
+            'nombre',
+            'apellido',
+            'img_profile',
+            'biografia',
+            'ubicacion',
+            'telefono',
+            'fecha_nacimiento',
+            'sobre_mi',
+            'educacion',
+            'experiencia',
+            'habilidades'
+        ]
 
     def update(self, instance, validated_data):
         # Actualizar campo simple

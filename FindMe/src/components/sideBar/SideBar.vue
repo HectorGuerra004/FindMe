@@ -57,18 +57,28 @@ const checkMobile = () => {
     emitState()
 }
 const logout = async () => {
-    try {
-        closeIfMobile()
-        await api.post('/logout/')
-        localStorage.removeItem('auth_token')
-        user.value = null
-        router.push('/login')
-    } catch (error) {
-        console.error('Error al cerrar sesión:', error)
-        user.value = null
-        router.push('/login')
-    }
-}
+  try {
+    closeIfMobile(); // mantienes tu lógica para cerrar sidebar en móvil
+    await api.post('/logout/');
+    
+    // Limpias el token si lo tienes guardado así (opcional según tu implementación)
+    localStorage.removeItem('auth_token');
+
+    // Limpias también el usuario del localStorage y el ref
+    localStorage.removeItem('user');
+    user.value = null;
+
+    router.push('/login');
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+
+    // Asegurar limpieza aunque haya error
+    localStorage.removeItem('user');
+    user.value = null;
+
+    router.push('/login');
+  }
+};
 
 onMounted(() => {
     checkMobile()

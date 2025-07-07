@@ -12,6 +12,8 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from projects.authentication import CookieTokenAuthentication
+from rest_framework.permissions import AllowAny
+
 
 from rest_framework.permissions import IsAuthenticated  # <-- Importación añadida
 
@@ -168,3 +170,21 @@ class CompleteProfileView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# views.py
+
+class PublicProfileView(APIView):
+    permission_classes = [AllowAny]  # O IsAuthenticated si quieres que solo usuarios autenticados vean perfiles
+    
+    @extend_schema(
+        responses=CompleteProfileSerializer,
+    )
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            profile = user.profile
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            return Response({"error": "Perfil no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CompleteProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)

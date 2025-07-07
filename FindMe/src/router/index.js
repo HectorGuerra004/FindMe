@@ -6,6 +6,7 @@ import LandingPage from '../views/LandingPage.vue';
 import ConfigurationView from '../views/ConfigurationView.vue';
 import UserProfile from '../views/UserProfile.vue';
 import CompleteProfile from '@/views/completeProfile.vue';
+import { user } from '@/stores/user.js'; // Ajusta la ruta según tu estructura
 
 
 const routes = [
@@ -13,9 +14,29 @@ const routes = [
   { path: '/register', name: 'Register', component: RegisterView },
   { path: '/', name: 'Landing', component: LandingPage },
   { path: '/configuration', name: 'Configuration', component: ConfigurationView },
-  { path: '/profile', name: 'UserProfile', component: UserProfile },
-  { path: '/completeProfile', name: 'CompleteProfile', component: CompleteProfile },
+  
+  // Perfil dinámico con parámetro ID
+  { 
+    path: '/profile/:id', 
+    name: 'UserProfile', 
+    component: UserProfile,
+    props: true // Permite pasar el parámetro como prop
+  },
+  
+  // Mantenemos la ruta sin parámetro para redirección
+  {
+  path: '/profile',
+  redirect: () => {
+    if (user.value && user.value.id) {
+      return { name: 'UserProfile', params: { id: user.value.id } };
+    } else {
+      // Si no está logueado, por ejemplo, redirige al login
+      return { name: 'Login' };
+    }
+  }
+},
 
+  { path: '/completeProfile', name: 'CompleteProfile', component: CompleteProfile },
 ];
 
 const router = createRouter({
