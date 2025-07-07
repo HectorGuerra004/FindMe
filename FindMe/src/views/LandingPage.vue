@@ -13,7 +13,9 @@
               <p class="location">{{ user.location }}</p>
             </div>
             <div class="card-actions">
-              <button class="connect-button">Connect</button>
+              <router-link :to="`/profile/${user.id}`" class="connect-button">
+                ⌕ Ver
+              </router-link>
             </div>
           </div>
         </div>
@@ -23,8 +25,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import SideBar from '@/components/sideBar/SideBar.vue'
+import api from '../utils/api';
+
+const users = ref([]) // ✅ FALTA ESTA LÍNEA
 
 const sidebarVisible = ref(true)
 const isMobile = ref(false)
@@ -34,36 +39,24 @@ const handleSidebarState = (state) => {
   isMobile.value = state.isMobile
 }
 
-const users = ref([
-  {
-    id: 1,
-    name: 'Nedy 70D8&',
-    title: 'Networking, Wide VNet Cotingoh',
-    location: '32.10.00k',
-    image: 'https://via.placeholder.com/80'
-  },
-  {
-    id: 2,
-    name: 'Ned 765086',
-    title: 'Networking, Wide VNet Polingri',
-    location: '9.84.00ck',
-    image: 'https://via.placeholder.com/80'
-  },
-  {
-    id: 3,
-    name: 'Nel eading 6',
-    title: 'VNet Planner, Wide VNet Polingri',
-    location: '52.02.01rk',
-    image: 'https://via.placeholder.com/80'
-  },
-  {
-    id: 4,
-    name: 'Nanlec B16a',
-    title: 'VNet Admin, Wide VNet Polingri',
-    location: '50.01.5trk',
-    image: 'https://via.placeholder.com/80'
-  },
-])
+onMounted(async () => {
+  try {
+    const { data } = await api.get('/profiles/')
+    console.log('Perfiles recibidos:', data)
+    users.value = data.map(user => ({
+      id: user.user_id,
+      name: `${user.nombre} ${user.apellido}`,
+      title: user.titulo || 'Sin título',
+      location: user.ubicacion,
+      image: user.img_profile || 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png'
+    }))
+    if (users.value.length === 0) {
+      console.warn('No se encontraron usuarios para mostrar.')
+    }
+  } catch (error) {
+    console.error('Error al obtener perfiles:', error)
+  }
+})
 </script>
 
 <style scoped>
@@ -103,12 +96,30 @@ const users = ref([
   color: #666;
   margin: 0.25rem 0;
 }
+.card-actions {
+  margin-top: 1.5rem;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
 .connect-button {
   background: #c246a1;
   color: white;
   border: none;
-  border-radius: 12px;
-  padding: 0.5rem 1rem;
-  margin-top: 0.5rem;
+  border-radius: 16px;
+  padding: 0.6rem 1.5rem;
+  margin-top: 0;
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(194, 70, 161, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+.connect-button:hover {
+  background: #b04cc8;
+  transform: translateY(-2px) scale(1.04);
 }
 </style>

@@ -6,7 +6,7 @@ from .serializers import (
     UserRegisterSerializer, UserSerializer,
     ProfileSerializer, EducationSerializer,
     LikeSerializer, LoginSerializer,
-    CompleteProfileSerializer
+    CompleteProfileSerializer, ProfileListSerializer
 )
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -188,3 +188,9 @@ class PublicProfileView(APIView):
 
         serializer = CompleteProfileSerializer(profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class ProfileListView(APIView):
+    def get(self, request):
+        perfiles = Profile.objects.all()
+        serializer = ProfileListSerializer(perfiles, many=True)
+        return Response(serializer.data)
