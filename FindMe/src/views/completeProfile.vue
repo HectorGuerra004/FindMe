@@ -131,6 +131,8 @@ const handleSubmit = async (e) => {
           </div>
           <button type="button" class="btn-agregar" @click="addEducacion">Agregar otra educación</button>
           <!-- HABILIDADES -->
+                    <label>Habilidades</label>
+
           <div v-for="(hab, idx) in habilidades" :key="'hab-' + idx" class="skill-group">
             <div class="input-row">
               <div class="input-column">
@@ -152,6 +154,8 @@ const handleSubmit = async (e) => {
           <button type="button" class="btn-agregar" @click="addHabilidad">Agregar otra habilidad</button>
 
           <!-- EXPERIENCIA -->
+                     <label>Experiencia</label>
+
           <div v-for="(exp, idx) in experiencia" :key="'exp-' + idx" class="experience-group">
             <div class="input-row">
               <div class="input-column">
@@ -198,9 +202,9 @@ const handleSubmit = async (e) => {
 <style scoped>
 .register-container {
   max-width: 800px;
-  margin: 100px auto;
+  margin: 10px auto;
   padding: 2rem;
-  background: #fff;
+  background: #e1e4e9;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: left;

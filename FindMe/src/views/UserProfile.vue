@@ -202,8 +202,9 @@ const onLikeProfile = () => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  background-color: #f4f6f9;
+  background-color: #e1e4e9;
   min-height: 100vh;
+  border-radius: 25px;
 }
 
 .profile-header {
@@ -223,7 +224,7 @@ const onLikeProfile = () => {
   top: 1.5rem;
   right: 2rem;
   z-index: 2;
-  background: linear-gradient(90deg, #3c1650 0%, #901d6a 100%);
+  background: linear-gradient(135deg, #03016b 0%, #534bed 100%);
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -256,7 +257,7 @@ const onLikeProfile = () => {
 .avatar-wrapper {
   position: relative;
   display: inline-block;
-  background: linear-gradient(135deg, #3c1650 0%, #901d6a 100%);
+  background: linear-gradient(135deg, #03016b 0%, #534bed 100%);
   padding: 6px;
   border-radius: 50%;
   box-shadow: 0 6px 24px 0 rgba(139, 96, 211, 0.18), 0 1.5px 6px 0 rgba(90, 174, 240, 0.10);
@@ -408,7 +409,7 @@ const onLikeProfile = () => {
   background: white;
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(144, 29, 106, 0.10);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
   border: 1.5px solid transparent;
   transition: border 0.2s, box-shadow 0.35s cubic-bezier(0.4, 0.2, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
@@ -517,5 +518,17 @@ const onLikeProfile = () => {
     margin-top: 0.5rem;
     justify-content: flex-start;
   }
+}
+
+@media (max-width: 590px) {
+.profile-main {
+  flex-direction: column;
+}
+
+.left-column,
+.right-column {
+  flex: none;
+  margin-bottom: 1.5;
+}
 }
 </style>
