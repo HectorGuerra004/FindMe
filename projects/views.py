@@ -5,12 +5,15 @@ from .models import User, Profile, Education, Like
 from .serializers import (
     UserRegisterSerializer, UserSerializer,
     ProfileSerializer, EducationSerializer,
-    LikeSerializer, LoginSerializer
+    LikeSerializer, LoginSerializer,
+    CompleteProfileSerializer
 )
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from projects.authentication import CookieTokenAuthentication
+from rest_framework.permissions import AllowAny
+
 
 from rest_framework.permissions import IsAuthenticated  # <-- Importación añadida
 
@@ -126,3 +129,62 @@ class LogoutView(APIView):
             response = Response({'detail': 'Successfully logged out.'})
             response.delete_cookie('auth_token')
             return response
+        
+class CompleteProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        request=CompleteProfileSerializer,
+        responses=CompleteProfileSerializer,
+    )
+    def get(self, request):
+        try:
+            profile = request.user.profile
+        except Profile.DoesNotExist:
+            return Response({"error": "Perfil no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CompleteProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=CompleteProfileSerializer,
+        responses=CompleteProfileSerializer,
+    )
+    def patch(self, request):
+        try:
+            profile = request.user.profile
+        except Profile.DoesNotExist:
+            return Response({"error": "Perfil no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Aquí está la corrección: pasamos la instancia profile para update, y partial=True para PATCH parcial
+        serializer = CompleteProfileSerializer(
+        profile,  # <-- aquí va la instancia actual que quieres modificar
+        data=request.data,
+        partial=True,  # <-- para indicar que es actualización parcial
+        context={'request': request}
+)
+
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+# views.py
+
+class PublicProfileView(APIView):
+    permission_classes = [AllowAny]  # O IsAuthenticated si quieres que solo usuarios autenticados vean perfiles
+    
+    @extend_schema(
+        responses=CompleteProfileSerializer,
+    )
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            profile = user.profile
+        except (User.DoesNotExist, Profile.DoesNotExist):
+            return Response({"error": "Perfil no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = CompleteProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -7,7 +7,9 @@ from .views import (
     EducationViewSet,
     LikeViewSet,
     LoginView,
-    LogoutView
+    LogoutView,
+    CompleteProfileView,
+    PublicProfileView
 )
 
 router = DefaultRouter()
@@ -18,7 +20,11 @@ router.register(r'likes', LikeViewSet)
 urlpatterns = [
     path('register/', UserRegisterView.as_view()),
     path('user/', UserDetailView.as_view()),
+    
     path('login/', LoginView.as_view()),
     path('logout/', LogoutView.as_view()),
+    path('complete-profile/', CompleteProfileView.as_view()),
+    path('public-profiles/<int:user_id>/', PublicProfileView.as_view(), name='public-profile'),
+
     path('', include(router.urls)),
 ]

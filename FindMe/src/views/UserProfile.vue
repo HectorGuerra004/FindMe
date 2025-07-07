@@ -3,8 +3,9 @@
     <SideBar @state-change="handleSidebarState" />
     <main :class="['main-content', { shifted: sidebarVisible && !isMobile }]">
       <div class="profile-page">
-        <!-- Header: Avatar, Details, Like Buttons -->
-        <section class="profile-header">
+
+        <!-- Header -->
+        <section class="profile-header" v-if="profileData">
           <div class="user-info">
             <div class="avatar-wrapper" style="position: relative; display: inline-block;">
               <img class="avatar" :src="userAvatar || 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png'"
@@ -14,14 +15,12 @@
               </div>
             </div>
             <div class="details details-row">
-              <h2>Jane Doe</h2>
-              <p class="location">San Francisco, CA</p>
+              <h2>{{ profileData?.nombre || 'Usuario sin nombre' }} {{ profileData?.apellido || '' }}</h2>
+              <p class="location">{{ profileData?.ubicacion || 'Ubicación no disponible' }}</p>
               <div class="bio-like-row">
-                <p class="bio">Experienced software engineer passionate about building innovative solutions.</p>
+                <p class="bio">{{ profileData?.sobre_mi || 'Este usuario no ha escrito su biografía.' }}</p>
                 <div class="action-buttons action-buttons-right">
-                  <button class="btn-like" @click="onLikeProfile">
-                    👍 Like
-                  </button>
+                  <button class="btn-like" @click="onLikeProfile">👍 Like</button>
                 </div>
               </div>
             </div>
@@ -31,136 +30,163 @@
           </router-link>
         </section>
 
-        <div class="card">
-          <h3>Sobre Mi</h3>
-          <div class="portfolio-item">
-            <span class="icon">🎬</span>
-            <div>
-              <p>Project Demo</p>
-              <p class="item-subtitle">Short description or link</p>
-            </div>
-          </div>
+        <!-- Sobre mí -->
+        <div class="card" v-if="profileData?.sobre_mi">
+          <h3>Sobre Mí</h3>
+          <p>{{ profileData.sobre_mi }}</p>
         </div>
-        <!-- Main Content -->
-        <section class="profile-main">
 
+        <!-- Contenido Principal -->
+        <section class="profile-main" v-if="!loading && profileData">
+          <!-- Educación -->
           <div class="left-column">
-            <!-- Portfolio Card -->
-            <!-- <div class="card">
-              <h3>Portfolio</h3>
-              <div class="portfolio-item">
-                <span class="icon">🎬</span>
-                <div>
-                  <p>Project Demo</p>
-                  <p class="item-subtitle">Short description or link</p>
-                </div>
-              </div>
-            </div> -->
-
-            <!-- Education Card -->
             <div class="card">
-              <h3>Education</h3>
-              <ul class="edu-list">
-                <li><span class="dot purple"></span> Python - advanced</li>
-                <li><span class="dot red"></span> Javascript - intermediate</li>
-                <li><span class="dot gray"></span> Matlab - inato</li>
-                <li><span class="dot blue"></span> Android - basic</li>
-                <li><span class="dot pink"></span> UX Design - basic</li>
-                <li><span class="dot green"></span> ML Design - basic</li>
-                <li><span class="dot purple"></span> Python - advanced</li>
-                <li><span class="dot red"></span> Javascript - intermediate</li>
-                <li><span class="dot gray"></span> Matlab - inato</li>
-                <li><span class="dot blue"></span> Android - basic</li>
-                <li><span class="dot pink"></span> UX Design - basic</li>
-                <li><span class="dot green"></span> ML Design - basic</li>
+              <h3>Habilidades</h3>
+              <ul v-if="profileData?.habilidades?.length">
+                <li v-for="(skill, index) in profileData.habilidades" :key="skill.id || index">
+                  {{ skill.nombre_skill }} — {{ skill.nivel }}
+                </li>
               </ul>
+              <p v-else>No se han agregado habilidades.</p>
             </div>
           </div>
 
+          <!-- Habilidades y Experiencia -->
           <div class="right-column">
-            <!-- Skills Card -->
-            <div class="card">
-              <h3>Skills</h3>
-              <p>Preolicy Danaile</p>
+            <!-- Skills -->
+             <div class="card">
+              <h3>Educación</h3>
+              <ul class="edu-list" v-if="profileData?.educacion?.length">
+                <li v-for="(edu, index) in profileData.educacion" :key="edu.id || index">
+                  <span class="dot purple"></span>
+                  {{ edu.titulo }} en {{ edu.campo_estudio }} — {{ edu.institucion }}
+                </li>
+              </ul>
+              <p v-else>No se ha agregado información educativa.</p>
             </div>
+            
 
-            <!-- Expanded Work Experience Card -->
+            <!-- Experiencia -->
             <div class="card work-experience">
-              <h3>Work Experience</h3>
-              <ul class="work-list lined">
-                <li>
+              <h3>Experiencia Laboral</h3>
+              <ul class="work-list lined" v-if="profileData?.experiencia?.length">
+                <li v-for="(job, index) in profileData.experiencia" :key="index">
                   <div class="job-entry">
-                    <strong>Acme Corp</strong> — Senior Developer<br />
-                    New York, NY<br />
-                    Jan 2020 — Present
-                  </div>
-                </li>
-                <li>
-                  <div class="job-entry">
-                    <strong>BetaTech</strong> — Software Engineer<br />
-                    San Francisco, CA<br />
-                    Jun 2017 — Dec 2019
-                  </div>
-                </li>
-                <li>
-                  <div class="job-entry">
-                    <strong>Gamma LLC</strong> — Junior Developer<br />
-                    Remote<br />
-                    Aug 2015 — May 2017
+                    <strong>{{ job.empresa }}</strong> — {{ job.puesto }}<br />
+                    {{ job.ubicacion_exp }}<br />
+                    {{ formatDate(job.inicio_exp) }} — {{ job.fin_exp ? formatDate(job.fin_exp) : 'Actualidad' }}
                   </div>
                 </li>
               </ul>
+              <p v-else>No se ha agregado experiencia laboral.</p>
             </div>
           </div>
         </section>
+
+        <p v-if="loading">Cargando perfil...</p>
+        <p v-if="error" class="error">{{ error }}</p>
       </div>
     </main>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, watch } from 'vue';
 import SideBar from '@/components/sideBar/SideBar.vue'
-import router from '@/router'
+import { useRoute } from 'vue-router';
+import useProfile from '@/services/profiles.js';
+
+const route = useRoute();
+const { getProfileData, getProfileById } = useProfile();
 
 const sidebarVisible = ref(true)
 const isMobile = ref(false)
 const userAvatar = ref('')
 
-// Maneja el estado del sidebar
+const profileData = ref(null);
+const loading = ref(false);
+const error = ref(null);
+const isOwnProfile = ref(false);
+const currentUserId = ref(null);
+
 const handleSidebarState = (state) => {
   sidebarVisible.value = state.visible
   isMobile.value = state.isMobile
 }
 
-// --- FUNCIONALIDAD DE BOTONES ---
-// Aquí puedes implementar la lógica real de cada acción
+const fetchCurrentUserId = async () => {
+  try {
+    const currentProfile = await getProfileData();
+    currentUserId.value = currentProfile.user.id;
+    return currentUserId.value;
+  } catch (err) {
+    console.error('Error obteniendo ID usuario actual:', err);
+    return null;
+  }
+};
 
-// 1. Editar foto de perfil
-// Llama a un modal, input file o navega a una vista de edición de avatar
-function onEditAvatar() {
-  // TODO: Abrir modal/input para subir nueva foto de perfil
-  // Ejemplo: mostrar un input file y actualizar userAvatar
-  alert('Funcionalidad para editar la foto de perfil (por implementar)')
-}
+const loadProfileData = async () => {
+  loading.value = true;
+  error.value = null;
 
-// 2. Editar perfil completo
-// Puede abrir un modal, navegar a otra ruta o mostrar un formulario editable
-function onEditProfile() {
-  // TODO: Navegar a /profile/edit o abrir modal de edición
-  alert('Funcionalidad para editar el perfil completo (por implementar)')
-}
+  try {
+    const userId = route.params.id;
+    if (!currentUserId.value) {
+      await fetchCurrentUserId();
+    }
 
-// 3. Like al perfil
-// Puede hacer una petición a la API para dar like y actualizar el estado
-function onLikeProfile() {
-  // TODO: Llamar a la API para dar like y mostrar feedback
-  alert('Funcionalidad de Like (por implementar)')
-}
+    isOwnProfile.value = parseInt(userId) === currentUserId.value;
 
+    profileData.value = isOwnProfile.value
+      ? await getProfileData()
+      : await getProfileById(userId);
+
+    if (profileData.value?.avatar) {
+      userAvatar.value = profileData.value.avatar;
+    }
+
+  } catch (err) {
+    error.value = 'Error cargando perfil del usuario';
+    console.error(err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '';
+  const options = { year: 'numeric', month: 'short' };
+  return new Date(dateStr).toLocaleDateString('es-ES', options);
+};
+
+onMounted(async () => {
+  await fetchCurrentUserId();
+  if (route.params.id) {
+    loadProfileData();
+  }
+});
+
+watch(() => route.params.id, (newId) => {
+  if (newId) loadProfileData();
+});
+
+const onEditAvatar = () => {
+  console.log('Editar avatar');
+};
+
+const onLikeProfile = () => {
+  console.log('Like al perfil');
+};
 </script>
 
+
+
 <style scoped>
+.error {
+  color: red;
+  font-weight: bold;
+  padding: 1rem;
+}
 .profile-page {
   padding: 2rem;
   display: flex;
