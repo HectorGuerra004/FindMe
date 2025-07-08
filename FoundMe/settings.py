@@ -66,6 +66,9 @@ REST_FRAMEWORK = {
 
 }
 
+# CORS_ALLOW_ALL_ORIGINS = True
+
+
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://192.168.1.107:5173",
@@ -75,19 +78,19 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = False  # True solo si usas HTTPS
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # False solo si usas HTTPS
 
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = False  # True solo si usas HTTPS
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # False solo si usas HTTPS
 
 # Si usas una cookie personalizada para el token:
-AUTH_TOKEN_COOKIE_SAMESITE = 'None'
-AUTH_TOKEN_COOKIE_SECURE = False  # True solo si usas HTTPS
-
-SESSION_COOKIE_SAMESITE = 'Lax'
-CSRF_COOKIE_SAMESITE = 'Lax'
 AUTH_TOKEN_COOKIE_SAMESITE = 'Lax'
+AUTH_TOKEN_COOKIE_SECURE = False  # False solo si usas HTTPS
+
+# SESSION_COOKIE_SAMESITE = 'Lax'
+# CSRF_COOKIE_SAMESITE = 'Lax'
+# AUTH_TOKEN_COOKIE_SAMESITE = 'Lax'
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API de Proyecto Universitario',

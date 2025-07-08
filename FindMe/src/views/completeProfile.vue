@@ -34,7 +34,7 @@ const cargarDatosPerfil = async () => {
     const data = await getProfileData()
     if (data) {
       sobreMi.value = data.sobre_mi || ''
-      educacion.value = (data.educacion && data.educacion.length > 0) 
+      educacion.value = (data.educacion && data.educacion.length > 0)
         ? data.educacion.map(item => ({
           titulo: item.titulo || '',
           institucion: item.institucion || '',
@@ -131,7 +131,7 @@ const handleSubmit = async (e) => {
           </div>
           <button type="button" class="btn-agregar" @click="addEducacion">Agregar otra educación</button>
           <!-- HABILIDADES -->
-                    <label>Habilidades</label>
+          <label>Habilidades</label>
 
           <div v-for="(hab, idx) in habilidades" :key="'hab-' + idx" class="skill-group">
             <div class="input-row">
@@ -149,12 +149,13 @@ const handleSubmit = async (e) => {
                 </select>
               </div>
             </div>
-            <button type="button" class="btn-eliminar" @click="removeHabilidad(idx)" v-if="habilidades.length > 1">Eliminar</button>
+            <button type="button" class="btn-eliminar" @click="removeHabilidad(idx)"
+              v-if="habilidades.length > 1">Eliminar</button>
           </div>
           <button type="button" class="btn-agregar" @click="addHabilidad">Agregar otra habilidad</button>
 
           <!-- EXPERIENCIA -->
-                     <label>Experiencia</label>
+          <label>Experiencia</label>
 
           <div v-for="(exp, idx) in experiencia" :key="'exp-' + idx" class="experience-group">
             <div class="input-row">
@@ -167,12 +168,12 @@ const handleSubmit = async (e) => {
                 <input v-model="exp.puesto" type="text" placeholder="Ej: Desarrollador Frontend" required />
               </div>
               <div class="input-column">
-  <label>Ubicación</label>
-  <input v-model="exp.ubicacion_exp" type="text" placeholder="Ej: Ciudad, País" />
-</div>
+                <label>Ubicación</label>
+                <input v-model="exp.ubicacion_exp" type="text" placeholder="Ej: Ciudad, País" />
+              </div>
 
             </div>
-            <div class="input-row">
+            <div class="input-row-experience">
               <div class="input-column">
                 <label>Fecha de inicio</label>
                 <input v-model="exp.inicio_exp" type="date" required />
@@ -239,6 +240,12 @@ textarea {
 }
 
 .input-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.input-row-experience {
   display: flex;
   gap: 1rem;
   margin-bottom: 1rem;
@@ -325,5 +332,17 @@ small {
   color: #666;
   font-size: 0.85rem;
   margin-top: 0.25rem;
+}
+
+@media (max-width: 590px) {
+
+  .btn-eliminar {
+    padding: 0.2rem 0.5rem;
+  }
+
+  .input-row-experience {
+    display: block;
+  }
+
 }
 </style>

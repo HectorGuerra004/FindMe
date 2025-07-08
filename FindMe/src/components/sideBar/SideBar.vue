@@ -92,7 +92,7 @@ onMounted(() => {
 
     <aside :class="['sidebar', { 'visible': sidebarVisible }]">
         <div class="sidebar-header">
-            <h2 class="titulo">Find<Span>Me</Span>
+            <h2 class="titulo">Find<span>Me</span>
             </h2>
             <button class="close-button" @click="closeSidebar" v-if="isMobile">
                 <span class="material-icons">close</span>
