@@ -18,6 +18,7 @@ router.register(r'profiles', ProfileViewSet)
 router.register(r'educations', EducationViewSet)
 router.register(r'likes', LikeViewSet)
 
+
 urlpatterns = [
     path('register/', UserRegisterView.as_view()),
     path('user/', UserDetailView.as_view()),

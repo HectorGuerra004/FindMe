@@ -92,7 +92,7 @@ onMounted(() => {
 
     <aside :class="['sidebar', { 'visible': sidebarVisible }]">
         <div class="sidebar-header">
-            <h2 class="titulo">Find<Span>Me</Span>
+            <h2 class="titulo">Find<span>Me</span>
             </h2>
             <button class="close-button" @click="closeSidebar" v-if="isMobile">
                 <span class="material-icons">close</span>
@@ -123,7 +123,7 @@ onMounted(() => {
     <header class="header" :class="{ 'desktop-sidebar-visible': !isMobile && sidebarVisible }">
         <div class="header-left">
             <button class="toggle-button" @click="toggleSidebar">
-                <span class="material-icons">{{ sidebarIcon }}</span>
+                <span id="material-icons-arrow" class="material-icons">{{ sidebarIcon }}</span>
             </button>
         </div>
         <div class="header-right">
@@ -200,11 +200,11 @@ onMounted(() => {
 .titulo {
     font-size: 1.5rem;
     font-weight: bold;
-    color: #1a1a3c;
+    color: white;
 }
 
 .titulo span {
-    color: #b04cc8;
+    color: #2690f4;
 }
 
 /* Sidebar */
@@ -214,7 +214,7 @@ onMounted(() => {
     left: 0;
     bottom: 0;
     width: 250px;
-    background-color: #f0f1f6;
+    background-color: #060d47;
     color: white;
     z-index: 1001;
     display: flex;
@@ -283,7 +283,7 @@ onMounted(() => {
     margin-bottom: 0.5rem;
     transition: background-color 0.2s;
     width: 100%;
-    background-color: #2c3e50;
+    background-color: #3498db;
 }
 
 .button-nav:hover {
@@ -295,6 +295,12 @@ onMounted(() => {
 } */
 
 .material-icons {
+    margin-right: 1rem;
+    color: white;
+
+}
+
+#material-icons-arrow {
     margin-right: 1rem;
     color: black;
 

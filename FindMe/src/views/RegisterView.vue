@@ -48,9 +48,9 @@ const handleSubmit = async (e) => {
           <input v-model="nombre" type="text" placeholder="Nombre" required />
           <input v-model="apellido" type="text" placeholder="Apellido" required />
           <input v-model="email" type="email" placeholder="Correo electrónico" required />
-          <input v-model="telefono" type="tel" placeholder="Teléfono" />
-          <input v-model="fechaNacimiento" type="date" placeholder="Fecha de nacimiento" />
-          <input v-model="ubicacion" type="text" placeholder="Ubicación (País, Estado, Ciudad)" />
+          <input v-model="telefono" type="tel" placeholder="Teléfono" required />
+          <input v-model="fechaNacimiento" type="date" placeholder="Fecha de nacimiento" required />
+          <input v-model="ubicacion" type="text" placeholder="Ubicación (País, Estado, Ciudad)" required />
           <input v-model="password" type="password" placeholder="Contraseña" required />
           <button type="submit" :disabled="isLoading">Registrarse</button>
         </form>
@@ -68,7 +68,7 @@ const handleSubmit = async (e) => {
   max-width: 400px;
   margin: 100px auto;
   padding: 2rem;
-  background: #fff;
+  background: #e1e4e9;
   border-radius: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   text-align: center;
