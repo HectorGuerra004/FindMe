@@ -10,31 +10,50 @@ export default function useAuth() {
   const isLoading = ref(false);
 
   const login = async (email, password) => {
-    if (!email || !password) {
-      error.value = 'Todos los campos son obligatorios';
-      return;
+  if (!email || !password) {
+    error.value = 'Todos los campos son obligatorios';
+    return;
+  }
+  try {
+    isLoading.value = true;
+    const response = await api.post('/login/', { email, password });
+
+    if (response.data.user) {
+      user.value = response.data.user;
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      router.push({ name: 'Landing' });
+    } else {
+      throw new Error('Información de usuario no recibida');
     }
-    try {
-      isLoading.value = true;
-      const response = await api.post('/login/', { email, password });
+  } catch (err) {
+    console.error('Error al iniciar sesión:', err.response ? err.response.data : err.message);
 
-      if (response.data.user) {
-        user.value = response.data.user;
-
-        // Guardar usuario en localStorage para persistencia
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-
-        router.push({ name: 'Landing' }); // Ajusta el nombre de la ruta según corresponda
-      } else {
-        throw new Error('Información de usuario no recibida');
+    // --- ¡AQUÍ ESTÁ EL CAMBIO CLAVE! ---
+    if (err.response && err.response.data) {
+      // Priorizar 'non_field_errors' para errores de credenciales inválidas
+      if (err.response.data.non_field_errors && err.response.data.non_field_errors.length > 0) {
+        error.value = err.response.data.non_field_errors[0];
       }
-    } catch (err) {
-      console.error('Error al iniciar sesión:', err.response ? err.response.data : err.message);
-      error.value = err.response?.data?.errors?.[0] || 'Error desconocido al iniciar sesión.';
-    } finally {
-      isLoading.value = false;
+      // Si hubiera errores específicos de campo (ej: 'email' o 'password')
+      else if (err.response.data.email && err.response.data.email.length > 0) {
+        error.value = err.response.data.email[0];
+      } else if (err.response.data.password && err.response.data.password.length > 0) {
+        error.value = err.response.data.password[0];
+      }
+      // Mensaje genérico si no se encuentra un error específico en la respuesta
+      else {
+        error.value = 'Error desconocido al iniciar sesión. Por favor, intenta de nuevo.';
+      }
+    } else {
+      // Manejar errores de red o cualquier otro error sin respuesta del servidor
+      error.value = 'No se pudo conectar al servidor. Verifica tu conexión a internet.';
     }
-  };
+    // --- FIN DEL CAMBIO CLAVE ---
+
+  } finally {
+    isLoading.value = false;
+  }
+};
 
   const register = async (formData) => {
     try {

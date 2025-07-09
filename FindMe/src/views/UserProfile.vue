@@ -4,7 +4,6 @@
     <main :class="['main-content', { shifted: sidebarVisible && !isMobile }]">
       <div class="profile-page">
 
-        <!-- Header -->
         <section class="profile-header" v-if="profileData">
           <div class="user-info">
             <div class="avatar-wrapper" style="position: relative; display: inline-block;">
@@ -20,7 +19,13 @@
               <div class="bio-like-row">
                 <p class="bio">Numero de Contacto: {{ profileData?.telefono || 'Este usuario no ha escrito su biografía.' }}</p>
                 <div class="action-buttons action-buttons-right">
-                  <!-- <button class="btn-like" @click="onLikeProfile">👍 Like</button> -->
+                  <button v-if="!isOwnProfile && profileData.user" :class="['btn-like', { 'liked': isLiked }]"
+                    @click="onLikeProfile">
+                    {{ isLiked ? 'Quitar Like' : '👍 Like' }}
+                  </button>
+                  <span v-if="profileData.likes_count !== undefined" class="likes-count">
+                    {{ profileData.likes_count }} Likes
+                  </span>
                 </div>
               </div>
             </div>
@@ -30,15 +35,12 @@
           </router-link>
         </section>
 
-        <!-- Sobre mí -->
         <div class="card" v-if="profileData?.sobre_mi">
           <h3>Sobre Mí</h3>
           <p>{{ profileData.sobre_mi }}</p>
         </div>
 
-        <!-- Contenido Principal -->
         <section class="profile-main" v-if="!loading && profileData">
-          <!-- Educación -->
           <div class="left-column">
             <div class="card">
               <h3>Habilidades</h3>
@@ -51,9 +53,7 @@
             </div>
           </div>
 
-          <!-- Habilidades y Experiencia -->
           <div class="right-column">
-            <!-- Skills -->
             <div class="card">
               <h3>Educación</h3>
               <ul class="edu-list" v-if="profileData?.educacion?.length">
@@ -65,8 +65,6 @@
               <p v-else>No se ha agregado información educativa.</p>
             </div>
 
-
-            <!-- Experiencia -->
             <div class="card work-experience">
               <h3>Experiencia Laboral</h3>
               <ul class="work-list lined" v-if="profileData?.experiencia?.length">
@@ -95,6 +93,7 @@ import { ref, onMounted, watch } from 'vue';
 import SideBar from '@/components/sideBar/SideBar.vue'
 import { useRoute } from 'vue-router';
 import useProfile from '@/services/profiles.js';
+import likesService from '@/services/likes.js'; // Importa el servicio de likes
 
 const route = useRoute();
 const { getProfileData, getProfileById } = useProfile();
@@ -108,26 +107,25 @@ const loading = ref(false);
 const error = ref(null);
 const isOwnProfile = ref(false);
 const currentUserId = ref(null);
+const isLiked = ref(false);
 
 const handleSidebarState = (state) => {
   sidebarVisible.value = state.visible
   isMobile.value = state.isMobile
 }
 
-// Nueva función para obtener el id del usuario desde localStorage
 const getCurrentUserIdFromStorage = () => {
   const storedUser = localStorage.getItem('user')
   if (!storedUser) return null
   try {
     const parsed = JSON.parse(storedUser)
-    return parsed.id
+    return parsed.id // Este es el ID del usuario logueado
   } catch (e) {
     console.error('Error al parsear usuario del localStorage:', e)
     return null
   }
 }
 
-// Reemplazamos fetchCurrentUserId por esta que lee localStorage
 const fetchCurrentUserId = () => {
   currentUserId.value = getCurrentUserIdFromStorage()
 }
@@ -137,25 +135,58 @@ const loadProfileData = async () => {
   error.value = null;
 
   try {
-    const userIdParam = route.params.id;
-    fetchCurrentUserId();
+    const userIdParam = route.params.id; // Este es el ID de la URL
+    fetchCurrentUserId(); // Obtiene el ID del usuario logueado desde localStorage
 
-    const resolvedId = parseInt(userIdParam);
-    const actualId = currentUserId.value;
+    console.log('ID de la URL (userIdParam):', userIdParam);
+    console.log('ID del usuario logueado (currentUserId.value):', currentUserId.value);
 
+    const resolvedId = parseInt(userIdParam); // ID numérico de la URL
+    const actualId = currentUserId.value; // ID numérico del usuario logueado
+
+    // Importante: La comparación inicial con el ID de la URL
     isOwnProfile.value = resolvedId === actualId;
 
+    // Carga los datos del perfil
     profileData.value = isOwnProfile.value
-      ? await getProfileData()
-      : await getProfileById(resolvedId);
+      ? await getProfileData() // Obtiene el perfil del usuario logueado
+      : await getProfileById(resolvedId); // Obtiene el perfil por ID de la URL
 
-    if (profileData.value?.avatar) {
-      userAvatar.value = profileData.value.avatar;
+    console.log('Datos del perfil cargados (profileData):', profileData.value);
+
+    // --- CAMBIOS CLAVE PARA OBTENER EL ID CORRECTO DEL PERFIL ---
+    // Usamos profileData.value.user como el ID real del perfil para las operaciones de likes
+    const profileIdToUse = profileData.value?.user;
+
+    console.log('ID del perfil cargado (profileIdToUse - de profileData.user):', profileIdToUse);
+
+    // Re-evaluar isOwnProfile usando el ID real del perfil desde el backend
+    // Esto es crucial para asegurar que la bandera sea correcta.
+    isOwnProfile.value = profileIdToUse === actualId;
+    console.log('¿Es el perfil propio (isOwnProfile) después de la carga y re-evaluación?:', isOwnProfile.value);
+
+    // Asigna la imagen de perfil
+    if (profileData.value?.img_profile) {
+      userAvatar.value = profileData.value.img_profile;
+    } else {
+      userAvatar.value = 'https://cdn-icons-png.flaticon.com/512/1144/1144760.png';
+    }
+
+    // Lógica para verificar el estado del like
+    // Solo si NO es el perfil propio y si tenemos un ID de perfil válido (profileIdToUse)
+    if (!isOwnProfile.value && profileIdToUse) { // <-- Condición actualizada
+      const likeStatus = await likesService.checkIfLiked(profileIdToUse); // <-- Usa profileIdToUse
+      isLiked.value = likeStatus.is_liked;
+      console.log('Estado de like (isLiked):', isLiked.value);
+    } else {
+      isLiked.value = false;
+      console.log('No se verificó el like (perfil propio o sin ID de perfil válido). isLiked:', isLiked.value);
     }
 
   } catch (err) {
     error.value = 'Error cargando perfil del usuario';
-    console.error(err);
+    console.error('Detalle del error al cargar perfil:', err);
+    isLiked.value = false; // Reinicia el estado del like en caso de error
   } finally {
     loading.value = false;
   }
@@ -182,15 +213,45 @@ const onEditAvatar = () => {
   console.log('Editar avatar');
 };
 
-const onLikeProfile = () => {
-  console.log('Like al perfil');
+const onLikeProfile = async () => {
+  const profileIdToSend = profileData.value?.user;
+
+  if (!profileIdToSend) {
+    console.warn('No se puede procesar el like, el ID del perfil no está disponible.');
+    alert('No se pudo procesar tu acción. Inténtalo de nuevo más tarde.');
+    return;
+  }
+
+  try {
+    const response = await likesService.toggleLike(profileIdToSend);
+    isLiked.value = !isLiked.value;
+
+    // ¡CONFIRMA ESTE BLOQUE DE CÓDIGO!
+    if (profileData.value && profileData.value.likes_count !== undefined) {
+        if (isLiked.value) { // Si acabamos de dar like
+            profileData.value.likes_count++;
+        } else { // Si acabamos de quitar el like
+            profileData.value.likes_count--;
+        }
+    }
+
+    console.log('Operación de like exitosa:', response.detail || response);
+
+    if (response.detail && response.detail.includes('eliminado')) {
+        alert('¡Me gusta eliminado!');
+    } else {
+        alert('¡Me gusta agregado!');
+    }
+
+  } catch (err) {
+    console.error('Error al procesar el like:', err.response?.data || err.message);
+    alert('Hubo un error al procesar tu "me gusta".');
+  }
 };
 </script>
 
-
-
-
 <style scoped>
+/* Estilos que ya tenías */
 .error {
   color: red;
   font-weight: bold;
@@ -202,8 +263,9 @@ const onLikeProfile = () => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  background-color: #f4f6f9;
+  background-color: #e1e4e9;
   min-height: 100vh;
+  border-radius: 25px;
 }
 
 .profile-header {
@@ -223,7 +285,7 @@ const onLikeProfile = () => {
   top: 1.5rem;
   right: 2rem;
   z-index: 2;
-  background: linear-gradient(90deg, #3c1650 0%, #901d6a 100%);
+  background: linear-gradient(135deg, #03016b 0%, #534bed 100%);
   color: #fff;
   border: none;
   border-radius: 20px;
@@ -256,7 +318,7 @@ const onLikeProfile = () => {
 .avatar-wrapper {
   position: relative;
   display: inline-block;
-  background: linear-gradient(135deg, #3c1650 0%, #901d6a 100%);
+  background: linear-gradient(135deg, #03016b 0%, #534bed 100%);
   padding: 6px;
   border-radius: 50%;
   box-shadow: 0 6px 24px 0 rgba(139, 96, 211, 0.18), 0 1.5px 6px 0 rgba(90, 174, 240, 0.10);
@@ -343,8 +405,27 @@ const onLikeProfile = () => {
 .bio-like-row .action-buttons-right {
   margin: 0;
   min-width: 110px;
-  align-items: center;
+  /* align-items: center; */
   height: auto;
+}
+.action-buttons-right {
+  display: flex; /* Para alinear el botón y el texto */
+  align-items: center; 
+  gap: 10px; /* Espacio entre los elementos */
+  /* ... otros estilos que ya tuvieras */
+}
+
+.likes-count {
+  background: linear-gradient(135deg, #03016b 0%, #534bed 100%);
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: bold;
+  white-space: nowrap; /* Evita saltos de línea */
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(139, 96, 211, 0.10);
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s, filter 0.2s;
+  
 }
 
 .location {
@@ -372,17 +453,19 @@ const onLikeProfile = () => {
   height: 100%;
 }
 
+/* CAMBIOS CLAVE AQUÍ: Estilos del botón de Like/Unlike */
 .btn-like {
   padding: 0.5rem 1rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 20px;
   font-size: 0.9rem;
   font-weight: bold;
   cursor: pointer;
-  background: linear-gradient(90deg, #3c1650 0%, #901d6a 100%);
+  background: linear-gradient(135deg, #03016b 0%, #534bed 100%);
   color: #fff;
   box-shadow: 0 2px 8px rgba(139, 96, 211, 0.10);
-  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s, filter 0.2s;
+  /* Añade filter para el hover */
 }
 
 .btn-like:hover {
@@ -390,6 +473,20 @@ const onLikeProfile = () => {
   transform: scale(1.11);
   box-shadow: 0 6px 18px 0 rgba(60, 22, 80, 0.35), 0 1.5px 6px 0 rgba(144, 29, 106, 0.18);
 }
+
+/* Estilo para cuando el perfil ya ha recibido "me gusta" */
+.btn-like.liked {
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+  /* Un color más rojizo para "Quitar Like" */
+  color: #fff;
+  border: 1px solid #c0392b;
+}
+
+.btn-like.liked:hover {
+  filter: brightness(1.15);
+  /* Aumenta el brillo al pasar el ratón */
+}
+
 
 .profile-main {
   display: flex;
@@ -408,7 +505,7 @@ const onLikeProfile = () => {
   background: white;
   border-radius: 20px;
   padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(144, 29, 106, 0.10);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
   border: 1.5px solid transparent;
   transition: border 0.2s, box-shadow 0.35s cubic-bezier(0.4, 0.2, 0.2, 1), transform 0.35s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
@@ -516,6 +613,26 @@ const onLikeProfile = () => {
   .bio-like-row .action-buttons-right {
     margin-top: 0.5rem;
     justify-content: flex-start;
+  }
+}
+
+@media (max-width: 590px) {
+  .profile-main {
+    flex-direction: column;
+  }
+
+  .left-column,
+  .right-column {
+    flex: none;
+    margin-bottom: 1.5;
+  }
+
+  .btn-like {
+    margin-bottom: 1.5rem;
+  }
+
+  .likes-count{
+    margin-bottom: 1rem;
   }
 }
 </style>

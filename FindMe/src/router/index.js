@@ -9,10 +9,12 @@ import CompleteProfile from '@/views/completeProfile.vue';
 import { user } from '@/stores/user.js'; // Ajusta la ruta según tu estructura
 
 
+
 const routes = [
   { path: '/login', name: 'Login', component: LoginView },
   { path: '/register', name: 'Register', component: RegisterView },
   { path: '/', name: 'Landing', component: LandingPage },
+
   { path: '/configuration', name: 'Configuration', component: ConfigurationView },
   
   // Perfil dinámico con parámetro ID

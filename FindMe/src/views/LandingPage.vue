@@ -133,7 +133,7 @@ onMounted(async () => {
   justify-content: center;
 }
 .connect-button {
-  background: #c246a1;
+  background: #060d47;
   color: white;
   border: none;
   border-radius: 16px;
@@ -149,7 +149,7 @@ onMounted(async () => {
   text-decoration: none;
 }
 .connect-button:hover {
-  background: #b04cc8;
+  background: #47adf1;
   transform: translateY(-2px) scale(1.04);
 }
 .search-bar-container {
