@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-4en3hb!tfl-6q&30s_cs9@2h0ze0o3)x(yszbn&ox-jp4&)=28
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -41,10 +41,13 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'projects',
         'drf_spectacular',  # Añade esta línea
+    'corsheaders',  # Añade esta línea para CORS
+        
 
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -62,6 +65,32 @@ REST_FRAMEWORK = {
         'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
 }
+
+# CORS_ALLOW_ALL_ORIGINS = True
+
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://192.168.1.107:5173",
+
+        # Cambia el puerto si tu frontend usa otro
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # False solo si usas HTTPS
+
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False  # False solo si usas HTTPS
+
+# Si usas una cookie personalizada para el token:
+AUTH_TOKEN_COOKIE_SAMESITE = 'Lax'
+AUTH_TOKEN_COOKIE_SECURE = False  # False solo si usas HTTPS
+
+# SESSION_COOKIE_SAMESITE = 'Lax'
+# CSRF_COOKIE_SAMESITE = 'Lax'
+# AUTH_TOKEN_COOKIE_SAMESITE = 'Lax'
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API de Proyecto Universitario',
