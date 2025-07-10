@@ -1,3 +1,6 @@
+/* Si usas CSS */
+@import "../../node_modules/@material-design-icons/font/index.css";
+
 /* Estilos base */
 .app-container {
     display: flex;
