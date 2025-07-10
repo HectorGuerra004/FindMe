@@ -245,7 +245,7 @@ const onLikeProfile = async () => {
 
   } catch (err) {
     console.error('Error al procesar el like:', err.response?.data || err.message);
-    alert('Hubo un error al procesar tu "me gusta".');
+    alert('Hubo un error al procesar tu "me gusta". Para dar like necesitas estar logueado.');
   }
 };
 </script>
@@ -633,6 +633,10 @@ const onLikeProfile = async () => {
 
   .likes-count{
     margin-bottom: 1rem;
+  }
+
+  .dot {
+    width: 15px;
   }
 }
 </style>

@@ -108,10 +108,10 @@ onMounted(() => {
                 <span class="material-icons">account_circle</span>
                 <span class="text">Mi perfil</span>
             </router-link>
-            <router-link v-if="user" to="/configuration" class="button" @click="closeIfMobile">
+            <!-- <router-link v-if="user" to="/configuration" class="button" @click="closeIfMobile">
                 <span class="material-icons">settings</span>
                 <span class="text">Configuración</span>
-            </router-link>
+            </router-link> -->
         </div>
         <div class="menu-bottom">
             <button v-if="user" class="button" @click="logout">

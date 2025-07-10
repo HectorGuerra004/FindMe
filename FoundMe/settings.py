@@ -71,7 +71,7 @@ REST_FRAMEWORK = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
-    "http://192.168.1.107:5173",
+    "http://192.168.1.105:5173",
 
         # Cambia el puerto si tu frontend usa otro
 ]
