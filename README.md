@@ -1,2 +1,2 @@
 # FindMe
-prejecto programacion 5 MCHL
+proyecto programacion 5 MCHL
